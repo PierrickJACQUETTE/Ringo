@@ -1,0 +1,128 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tikz}
+\usepackage{multicol}
+
+\newcommand*{\escape}[1]{\texttt{\textbackslash#1}}
+
+\usetheme{PaloAlto}
+
+\title{Protocole RINGO}
+\subtitle{Rapport du Projet}
+\author[]{ELBEZ Samuel 21200353, \\ JACQUETTE Pierrick 21305551}
+\date{Avril 2016}
+\institute[L3 S6 -- Informatique]{Université Paris 7 Diderot}
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}
+	\frametitle{Sommaire}
+	\tableofcontents	
+\end{frame}
+
+\section{Une entité}
+\begin{frame}{Une entité}
+	 \textbf{Les caractéristiques d'une entité}
+	 \begin{itemize}
+		 \item<2-10> Un identifiant (8 caractères et unique)
+ 		 \item<3-10> Un port d'écoute pour recevoir en UDP (< 9999)
+		 \item<4-10> Un port TCP
+		 \item<5-10> Une adresse IP où l'on envoi
+		 \item<6-10> Un port d'écoute UDP où l'on envoi (< 9999)
+		 \item<7-10> Un tableau d'adresse IPV4 multi-diffusion (panne du réseau)
+		 \item<8-10> Un tableau de port de multi-diffusion (< 9999) 
+		 \item<9-10> Un boolean pour savoir si c'est un duplicateur
+		 \item<10-10> Un tableau de liste de message déjà retransmis
+	\end{itemize}
+\end{frame}
+
+\section{Les ports }
+\begin{frame}{L'utilisation des différents ports}
+	 \begin{itemize}
+		 \item<1-2> \textbf{UDP} écoute et transmet les messages
+ 		 \item<2-2> \textbf{TCP} permet l'insertion ou duplication d'un anneau
+	\end{itemize}
+\end{frame}
+
+\section{Les conventions }
+\begin{frame}{Les conventions}
+	 \begin{itemize}
+		 \item<1-5> La syntaxe des messages
+		 \item<2-5> Un message a une taille maximale de 512 octets
+ 		 \item<3-5> Une entité recevant un message déjà transmis, on ne le retransmet pas
+ 		 \item<4-5> Si on reçoit un message mal formé, on ne le retransmet pas
+ 		 \item<5-5> Une entité reçoit un message d'application si elle supporte déclenche une action sinon transmet
+	\end{itemize}
+\end{frame}
+
+\section{Les messages}
+\begin{frame}{Les différents types de messages}
+	\textbf{Les messages d'application}
+	\begin{itemize}
+		 \item<1-9> APPL idm id-app message-app
+	\end{itemize}
+	\textbf{Les messages du protocole}
+	\begin{itemize}
+		 \item<2-9> \textbf{L'insertion : } WELC ip port ip-diff port-diff \escape{n}
+% 		 \item<3-8> \textbf{f} ff
+%		 \item<4-9> \textbf{}
+%		 \item<5-9> \textbf{}
+%		 \item<6-9> \textbf{}
+%		 \item<7-9> \textbf{} 
+%		 \item<8-9> \textbf{} 
+%		 \item<9-9> \textbf{} 
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Les applications}
+	\begin{itemize}
+		 \item<1-2> \textbf{Diffusion de messages à tout le monde :} APPL idm DIFF\#\#\#\# size-mess mess
+ 		 \item<2-2> \textbf{Transfert de fichiers :} 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{L'insertion}
+	\begin{multicols}{2}
+   		\visible<1-7>{
+			\begin{tikzpicture}
+				\node[draw] (E1) at (-1.5,0) {Entité 1};
+				\node[draw] (E2) at (1.5,0) {Entité 2};
+				\node[draw] (N) at (0,1) {Nouveau};
+				\node[draw=none] (d1) at (0,-0.1) {};
+				\draw[->] (E1) -- (E2);
+				\draw[->] (N) -- (d1);
+			\end{tikzpicture}
+		}
+		\visible<2-7>{
+			\begin{tikzpicture}
+				\node[draw] (E1) at (2,0) {Entité 1};
+				\node[draw] (E2) at (5,0) {Entité 2};
+				\node[draw] (N) at (3.5,1) {Nouveau};
+				\draw[->,>=latex] (E1) to[bend left] (N);
+				\draw[->,>=latex] (N) to[bend left] (E2);
+			\end{tikzpicture}
+		}
+	\end{multicols}
+	\begin{itemize}
+		\item<3-7> Nouveau se connecte à Entité 1
+		\item<4-7> Entité 1 envoi \textbf{WELC ip port ip-diff port-diff \escape{n}} (information qu'il connaît dans ses attributs : adresse et port de l’entité 2, adresse et port de multi-diffusion)
+		\item<4-> Nouveau reçoit WELC ip port ip-diff port-diff \escape{n}, stocke
+		\item<5-7> Nouveau envoi \textbf{NEWC ip port \escape{n}} (information qu'il connaît dans ses attributs : adresse et port de Nouveau)
+		\item<5-7> Entité 1 reçoit NEWC ip port \escape{n}, stocke
+		\item<6-7> Entité 1 envoi \textbf{ACKC \escape{n}}
+		\item<7-7> Entité 1 ferme la connexion
+		\item<6-7> Nouveau reçoit ACKC \escape{n} et ne le transfert pas
+	\end{itemize}
+\end{frame}
+
+\end{document}
+
