@@ -33,18 +33,18 @@
 	 \textbf{Les caractéristiques d'une entité}
 	 \begin{itemize}
 		 \item<2-10> Un identifiant (8 caractères et unique)
- 		 \item<3-10> Un port d'écoute pour recevoir en UDP (< 9999)
-		 \item<4-10> Un port TCP
-		 \item<5-10> Une adresse IP où l'on envoi
-		 \item<6-10> Un port d'écoute UDP où l'on envoi (< 9999)
-		 \item<7-10> Un tableau d'adresse IPV4 multi-diffusion (panne du réseau)
-		 \item<8-10> Un tableau de port de multi-diffusion (< 9999) 
+ 		 \item<3-10> Une chaîne de caractères pour le port de reception en UDP (< 9999)
+		 \item<4-10> Une chaîne de caractères pour le port d'envoi en UDP (< 9999)
+		 \item<5-10> Une chaîne de caractères pour l'adresse IP où l'on envoi
+		 \item<6-10> Une chaîne de caractères pour le port TCP
+		 \item<7-10> Un tableau de chaîne de caractères pour l'adresse IPV4 multi-diffusion (panne du réseau)
+		 \item<8-10> Un tableau de chaîne de caractères pour le port de multi-diffusion (< 9999) 
 		 \item<9-10> Un boolean pour savoir si c'est un duplicateur
-		 \item<10-10> Un tableau de liste de message déjà retransmis
+		 \item<10-10> Un tableau de liste de chaîne de caractères de l'identifiant du message transmis
 	\end{itemize}
 \end{frame}
 
-\section{Les ports }
+\section{Les ports}
 \begin{frame}{L'utilisation des différents ports}
 	 \begin{itemize}
 		 \item<1-2> \textbf{UDP} écoute et transmet les messages
@@ -52,7 +52,7 @@
 	\end{itemize}
 \end{frame}
 
-\section{Les conventions }
+\section{Les conventions}
 \begin{frame}{Les conventions}
 	 \begin{itemize}
 		 \item<1-5> La syntaxe des messages
@@ -63,19 +63,37 @@
 	\end{itemize}
 \end{frame}
 
+\section{La spécification}
+\begin{frame}{La spécification des messages}
+	 \begin{itemize}
+		 \item<1-11> Les 4 premiers octets : \textbf{WELC, NEWC, ACKC, APPL, WHOS, MEMB, GBYE, EYBG, TEST, DOWN, DUPL, ACKD}
+		 \item<2-11> \textbf{ip, ip-diff et ip-succ :} 15 oct, chaîne de caractères de l'adresse IPV4
+ 		 \item<3-11> \textbf{port, port-diff et port-succ :} 4 oct, chaîne de caractères du numéro de port
+ 		 \item<4-11> \textbf{idm et id-trans :} 8 oct unique
+ 		 \item<5-11> \textbf{id-app :} 8 oct, chaîne de caractères de l'identité de l'app
+ 		 \item<6-11> \textbf{id :} 8 oct, chaîne de caractères
+ 		 \item<7-11> \textbf{size-mess :} 3 oct, chaîne de caractères 
+ 		 \item<8-11> \textbf{size-nom :} 2 oct, chaîne de caractères
+ 		 \item<9-11> \textbf{num-mess et no-mess :} 8 oct, little endian
+ 		 \item<10-11> \textbf{size-content :} 3 oct, chaîne de caractères
+	\end{itemize}
+	\visible<11-11>{
+		size-mess, size-nom et size-content complété par des 0 au début
+	}
+\end{frame}
+
 \section{Les messages}
 \begin{frame}{Les différents types de messages}
 	\textbf{Les messages d'application}
 	\begin{itemize}
-		 \item<1-9> APPL idm id-app message-app
+		 \item<2-9> APPL idm id-app message-app
 	\end{itemize}
 	\textbf{Les messages du protocole}
 	\begin{itemize}
-		 \item<2-9> \textbf{L'insertion : } WELC ip port ip-diff port-diff \escape{n}
-% 		 \item<3-8> \textbf{f} ff
-%		 \item<4-9> \textbf{}
-%		 \item<5-9> \textbf{}
-%		 \item<6-9> \textbf{}
+		 \item<3-9> \textbf{L'insertion :} WELC ip port ip-diff port-diff \escape{n}
+ 		 \item<4-9> \textbf{Qui :} WHOS idm
+		 \item<5-9> \textbf{Suppression :} GBYE idm ip port ip-succ port-succ
+		 \item<6-9> \textbf{Tester un anneau :} TEST idm ip-diff port-diff
 %		 \item<7-9> \textbf{} 
 %		 \item<8-9> \textbf{} 
 %		 \item<9-9> \textbf{} 
@@ -86,41 +104,98 @@
 \begin{frame}{Les applications}
 	\begin{itemize}
 		 \item<1-2> \textbf{Diffusion de messages à tout le monde :} APPL idm DIFF\#\#\#\# size-mess mess
- 		 \item<2-2> \textbf{Transfert de fichiers :} 
+ 		 \item<2-2> \textbf{Transfert de fichiers :} A COMPLETER
 	\end{itemize}
 \end{frame}
 
 \begin{frame}{L'insertion}
+	\begin{tikzpicture}
+			\node[draw] (E1) at (-3,0) {Entité 1};
+			\node[draw] (E2) at (3,0) {Entité 2};
+			\node[draw] (N) at (0,1) {Nouveau};
+			\node[draw=none] (d1) at (0,-0.1) {};
+			\visible<1>{
+				\draw[->,>=latex] (N) -- (d1);
+			}
+			\visible<1-5>{
+				\draw[->,>=latex] (E1) -- (E2);
+			}
+			\visible<2>{
+				\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{connect} (N);
+			}
+			\visible<3>{
+				\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{WELC} (N);
+			}
+			\visible<4>{
+				\draw[->,>=latex] (N) to[bend right] node[sloped,midway,above]{NEWC} (E1);
+			}
+			\visible<5>{
+				\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{ACKC} (N);
+			}
+			\visible<6>{
+				\draw[->,>=latex] (E1) to[bend left](N);
+				\draw[->,>=latex] (N) to[bend left] (E2);
+			}
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+
+	\end{tikzpicture}
+	\begin{itemize}
+		\item<2-6> Nouveau se connecte à Entité 1
+		\item<3-6> Entité 1 envoi \textbf{WELC ip port ip-diff port-diff \escape{n}} (adresse et port de l’entité 2, adresse et port de multi-diffusion)
+		\item<3-6> Nouveau reçoit WELC ip port ip-diff port-diff \escape{n}, stocke
+		\item<4-6> Nouveau envoi \textbf{NEWC ip port \escape{n}} (information qu'il connaît dans ses attributs : adresse et port de Nouveau)
+		\item<4-6> Entité 1 reçoit NEWC ip port \escape{n}, stocke
+		\item<5-6> Entité 1 envoi \textbf{ACKC \escape{n}}
+		\item<6-6> Entité 1 ferme la connexion
+		\item<5-6> Nouveau reçoit ACKC \escape{n} et ne le transfert pas
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Qui est là ?}
+	\begin{itemize}
+		\item<1-5> Une entité 1 envoi \textbf{WHOS idm}
+		\item<2-5> Les n autres entités reçoivent et renvoi WHOS idm
+		\item<2-5> Elles envoient \textbf{MEMB idm id ip port} son IP et son port d'écoute
+		\item<3-5> Elles reçoivent MEMB idm id ip port et le renvoient
+		\item<4-5> Quand entité 1 reçoit WHOS idm , envoi son IP et son port d'écoute
+		\item<5-5> Quand chaque entité reçoit MEMB avec son numéro de port et son IP il les affichent
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Suppression}
 	\begin{multicols}{2}
-   		\visible<1-7>{
-			\begin{tikzpicture}
-				\node[draw] (E1) at (-1.5,0) {Entité 1};
-				\node[draw] (E2) at (1.5,0) {Entité 2};
-				\node[draw] (N) at (0,1) {Nouveau};
-				\node[draw=none] (d1) at (0,-0.1) {};
-				\draw[->] (E1) -- (E2);
-				\draw[->] (N) -- (d1);
-			\end{tikzpicture}
-		}
-		\visible<2-7>{
+   		\visible<1-6>{
 			\begin{tikzpicture}
 				\node[draw] (E1) at (2,0) {Entité 1};
 				\node[draw] (E2) at (5,0) {Entité 2};
-				\node[draw] (N) at (3.5,1) {Nouveau};
+				\node[draw] (N) at (3.5,1) {A Supprimer};
 				\draw[->,>=latex] (E1) to[bend left] (N);
 				\draw[->,>=latex] (N) to[bend left] (E2);
+				\draw[->,>=latex] (E2) to[bend left] (E1);
+			\end{tikzpicture}
+		}
+		\visible<2-6>{
+			\begin{tikzpicture}
+				\node[draw] (E1) at (2,0) {Entité 1};
+				\node[draw] (E2) at (5,0) {Entité 2};
+				\draw[->,>=latex] (E1) to[bend left] (E2);
+				\draw[->,>=latex] (E2) to[bend left] (E1);
 			\end{tikzpicture}
 		}
 	\end{multicols}
 	\begin{itemize}
-		\item<3-7> Nouveau se connecte à Entité 1
-		\item<4-7> Entité 1 envoi \textbf{WELC ip port ip-diff port-diff \escape{n}} (information qu'il connaît dans ses attributs : adresse et port de l’entité 2, adresse et port de multi-diffusion)
-		\item<4-> Nouveau reçoit WELC ip port ip-diff port-diff \escape{n}, stocke
-		\item<5-7> Nouveau envoi \textbf{NEWC ip port \escape{n}} (information qu'il connaît dans ses attributs : adresse et port de Nouveau)
-		\item<5-7> Entité 1 reçoit NEWC ip port \escape{n}, stocke
-		\item<6-7> Entité 1 envoi \textbf{ACKC \escape{n}}
-		\item<7-7> Entité 1 ferme la connexion
-		\item<6-7> Nouveau reçoit ACKC \escape{n} et ne le transfert pas
+		 \item<3-6> Entité envoi \textbf{GBYE idm ip port ip-succ port-succ} son identité et celle du suivant
+		 \item<4-6> Entités suivantes reçoivent le message et le transmette
+		 \item<4-6> Entité précédente reçoit le message, ne le retransmet pas (on sait que c'est la précédente car l'identité du message correspond à l'identité suivante de l'entité courante
+		 \item<5-6> Ce dernier envoi \textbf{EYBG idm} et modifie ses attributs d'identité suivante avec les nouvelles
+		 \item<6-6> Entité reçoit EYBG id, ne le retransmet pas, peut maintenant être supprimé
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Tester un anneau}
+	\begin{itemize}
+		\item
+		\item
 	\end{itemize}
 \end{frame}
 
