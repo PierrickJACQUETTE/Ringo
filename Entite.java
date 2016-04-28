@@ -1,8 +1,12 @@
-import java.net.Inet4Address;
-import java.net.InetAddress;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
-public class Entite {
+public class Entite implements Runnable {
 
 	private long identifiant;
 	private int portInUDP;
@@ -14,6 +18,7 @@ public class Entite {
 	private int[] portMultiDiff;
 	private boolean isDuplicateur;
 	private ArrayList<String> mssgTransmis;
+	private Scanner sc;
 
 	public Entite() {
 		this.identifiant = -1;
@@ -85,7 +90,7 @@ public class Entite {
 	public void setPortTCPIn(int portTCP) {
 		this.portTCPIn = portTCP;
 	}
-	
+
 	public int getPortTCPOut() {
 		return portTCPOut;
 	}
@@ -94,11 +99,11 @@ public class Entite {
 		this.portTCPOut = portTCP;
 	}
 
-	public String  getAddrNext() {
+	public String getAddrNext() {
 		return addrNext;
 	}
 
-	public void setAddrNext(String  addrNext) {
+	public void setAddrNext(String addrNext) {
 		this.addrNext = addrNext;
 	}
 
@@ -107,7 +112,7 @@ public class Entite {
 		if (i == 1) {
 			res = this.addrMultiDiff[0];
 		} else if (i == 2) {
-			res =  this.addrMultiDiff[1];
+			res = this.addrMultiDiff[1];
 		} else {
 			System.err.println("Erreur dans getAddrMultiDiff anneau non reconnue");
 		}
@@ -160,5 +165,25 @@ public class Entite {
 
 	public void setMssgTransmis(ArrayList<String> mssgTransmis) {
 		this.mssgTransmis = mssgTransmis;
+	}
+
+	public void run() {
+		while (true) {
+			Scanner sc = new Scanner(System.in);
+			String tmp = sc.nextLine();
+			System.out.println("message :" + tmp);
+			try {
+				DatagramSocket dso = new DatagramSocket();
+				byte[] data;
+				data = tmp.getBytes();
+				InetSocketAddress ia = new InetSocketAddress(this.addrNext, this.portOutUDP);
+				DatagramPacket paquet = new DatagramPacket(data, data.length, ia);
+				dso.send(paquet);
+			} catch (SocketException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 }

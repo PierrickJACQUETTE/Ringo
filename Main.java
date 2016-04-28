@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -12,8 +14,11 @@ import java.net.Socket;
 import java.net.StandardProtocolFamily;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -112,6 +117,7 @@ public class Main {
 		}
 		try {
 			Selector selector = Selector.open();
+
 			// --------------- TCP NON BLOQUANT ------------
 			ServerSocketChannel tcp_in_ssc = ServerSocketChannel.open();
 			tcp_in_ssc.configureBlocking(false);
@@ -141,6 +147,9 @@ public class Main {
 
 			ByteBuffer buff = ByteBuffer.allocate(512);
 
+			Thread scanner_in = new Thread(entite);
+			scanner_in.start();
+
 			while (true) {
 				if (affichage) {
 					System.out.println("Waiting for messages");
@@ -156,10 +165,10 @@ public class Main {
 						}
 						udp_multi_dc.receive(buff);
 						String st = new String(buff.array(), 0, buff.array().length);
-						buff.clear();
 						if (affichage) {
-							System.out.println("Message :" + st);
+							System.out.println("Message recu :" + st);
 						}
+						buff.clear();
 					}
 					if (sk.isReadable() && sk.channel() == udp_in_dc) {
 						if (affichage) {
@@ -168,8 +177,10 @@ public class Main {
 						udp_in_dc.receive(buff);
 						String st = new String(buff.array(), 0, buff.array().length);
 						if (affichage) {
-							System.out.println("Message :" + st);
+							System.out.println("Message recu :" + st);
 						}
+						buff.clear();
+
 					} else if (sk.isAcceptable() && sk.channel() == tcp_in_ssc) {
 						if (affichage) {
 							System.out.println("Evenement sur TCP");
@@ -217,7 +228,11 @@ public class Main {
 					}
 				}
 			}
-		} catch (Exception e) {
+		} catch (
+
+		Exception e)
+
+		{
 			e.printStackTrace();
 		}
 	}
