@@ -14,6 +14,7 @@ public class Entite implements Runnable {
 	private boolean isDuplicateur;
 	private ArrayList<String> mssgTransmisAnnneau1;
 	private ArrayList<String> mssgTransmisAnnneau2;
+	ArrayList<TimeTest> aLTT;
 
 	public Entite() {
 		this.identifiant = "-1";
@@ -29,6 +30,7 @@ public class Entite implements Runnable {
 		this.isDuplicateur = false;
 		this.mssgTransmisAnnneau1 = new ArrayList<String>();
 		this.mssgTransmisAnnneau2 = new ArrayList<String>();
+		aLTT = new ArrayList<TimeTest>();
 	}
 
 	public void printEntiteSimple() {
@@ -189,9 +191,13 @@ public class Entite implements Runnable {
 				if (tmp.equals("GBYE")) {
 					message += " " + Annexe.trouveAdress() + " " + this.portInUDP + " " + this.addrNext + " "
 							+ this.portOutUDP;
+				} else if (tmp.equals("TEST")) {
+					message += " " + this.addrMultiDiff[0] + " " + this.portMultiDiff[0];
+					TimeTest t = new TimeTest(idm, System.currentTimeMillis());
+					this.aLTT.add(t);
 				}
 				MssgUPD.analyseMssg(message, false);
-				MssgUPD.sendUDP(message, this, Main.affichage);
+				MssgUPD.sendUDP(message, this, Main.affichage, idm);
 				this.mssgTransmisAnnneau1.add(idm);
 			} catch (LengthException e) {
 				e.getMessage();

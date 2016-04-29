@@ -5,8 +5,10 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.ArrayList;
 
 public class MssgUPD {
+
 	protected static Entite receveUDP(Entite entite, boolean affichage, DatagramChannel udp_in_dc, ByteBuffer buff) {
 		if (affichage) {
 			System.out.println("Message UDP recu");
@@ -15,7 +17,7 @@ public class MssgUPD {
 			udp_in_dc.receive(buff);
 			String st = new String(buff.array(), 0, buff.array().length).trim();
 			if (affichage) {
-				System.out.println("Message recu :" + st);
+				System.out.println("Message recu : " + st);
 			}
 			analyseMssg(st, true);
 			String parts[] = st.split(" ");
@@ -27,6 +29,8 @@ public class MssgUPD {
 				mssgGBYE(st, parts, entite, affichage);
 			} else if (parts[0].equals("EYBG")) {
 				mssgEYBG(st, parts, entite, affichage);
+			} else if (parts[0].equals("TEST")) {
+				mssgTEST(st, parts, entite, affichage);
 			} else if (parts[0].equals("SUPP")) {
 				mssgSUPP(st, parts, entite, affichage);
 			}
@@ -50,7 +54,7 @@ public class MssgUPD {
 		}
 		String newIden = Annexe.newIdentifiant();
 		String message = "SUPP " + newIden + " " + idm;
-		sendUDP(message, entite, affichage);
+		sendUDP(message, entite, affichage, newIden);
 	}
 
 	private static void mssgWHO(String message, String[] parts, Entite entite, boolean affichage) {
@@ -58,13 +62,13 @@ public class MssgUPD {
 		if (entite.getMssgTransmisAnneau1().contains(idm)) {
 			removeMssg(idm, entite, affichage);
 		} else {
-			sendUDP(message, entite, affichage);
-
+			sendUDP(message, entite, affichage, idm);
+			entite.getMssgTransmisAnneau1().add(idm);
 		}
 		String idmM = Annexe.newIdentifiant();
 		message = "MEMB " + idmM + " " + entite.getIdentifiant() + " " + Annexe.trouveAdress() + " "
 				+ entite.getPortInUDP();
-		sendUDP(message, entite, affichage);
+		sendUDP(message, entite, affichage, idm);
 		entite.getMssgTransmisAnneau1().add(idmM);
 	}
 
@@ -73,7 +77,8 @@ public class MssgUPD {
 		if (entite.getMssgTransmisAnneau1().contains(idm)) {
 			removeMssg(idm, entite, affichage);
 		} else {
-			sendUDP(message, entite, affichage);
+			sendUDP(message, entite, affichage, idm);
+			entite.getMssgTransmisAnneau1().add(idm);
 			System.out.println("\nDans l'anneau est present : ");
 			System.out.println("Une entite avec cette identifiant : " + parts[2]);
 			System.out.println("Qui a comme port : " + parts[4] + " et comme addresse : " + parts[3] + "\n");
@@ -92,9 +97,9 @@ public class MssgUPD {
 			entite.setPortOutUDP(Integer.parseInt(parts[5]));
 			String idmNew = Annexe.newIdentifiant();
 			message = "EYBG" + " " + idmNew;
-			sendUDP(message, tmp, affichage);
+			sendUDP(message, tmp, affichage, idm);
 		} else {
-			sendUDP(message, entite, affichage);
+			sendUDP(message, entite, affichage, idm);
 		}
 	}
 
@@ -102,15 +107,31 @@ public class MssgUPD {
 		System.exit(0);
 	}
 
+	private static void mssgTEST(String message, String[] parts, Entite entite, boolean affichage) {
+		String idm = parts[1];
+		if (entite.aLTT.contains(idm)) {
+			entite.aLTT.remove(idm);
+		} else if (entite.getMssgTransmisAnneau1().contains(idm)) {
+			removeMssg(idm, entite, affichage);
+			System.out.println("\nL anneau est en parfait etat\n");
+		} else if (!parts[2].equals(entite.getAddrMultiDiff(1)) && !parts[3].equals(entite.getPortMultiDiff(1))) {
+			System.out.println("J'ai recu un message TEST mais ils n'appartient pas à mon anneau");
+		} else {
+			sendUDP(message, entite, affichage, idm);
+			entite.getMssgTransmisAnneau1().add(idm);
+		}
+	}
+
 	private static void mssgSUPP(String message, String[] parts, Entite entite, boolean affichage) {
 		String idm = parts[2];
 		if (entite.getMssgTransmisAnneau1().contains(idm)) {
 			removeMssg(idm, entite, affichage);
-			sendUDP(message, entite, affichage);
+			sendUDP(message, entite, affichage, idm);
 		}
+
 	}
 
-	protected static void sendUDP(String tmp, Entite entite, boolean affichage) {
+	protected static void sendUDP(String tmp, Entite entite, boolean affichage, String idm) {
 		try {
 			DatagramSocket dso = new DatagramSocket();
 			byte[] data;
@@ -131,18 +152,23 @@ public class MssgUPD {
 
 	protected static void analyseMssg(String str, boolean isPrivate) throws LengthException, MssgSpellCheck {
 		String parts[] = str.split(" ");
-		if (parts[0].equals("WHOS") || parts[0].equals("EYBG")) {
+		if (parts[0].equals("WHOS") || (parts[0].equals("EYBG") && isPrivate == true)) {
 			int longeur = 2;
 			if (parts.length == longeur) {
 				suiteAnalyseMssg(longeur, str, parts);
 			}
-		} else if (parts[0].equals("MEMB")) {
+		} else if (parts[0].equals("MEMB") && isPrivate == true) {
 			int longeur = 5;
 			if (parts.length == longeur) {
 				suiteAnalyseMssg(longeur, str, parts);
 			}
 		} else if (parts[0].equals("GBYE")) {
 			int longeur = 6;
+			if (parts.length == longeur) {
+				suiteAnalyseMssg(longeur, str, parts);
+			}
+		} else if (parts[0].equals("TEST")) {
+			int longeur = 4;
 			if (parts.length == longeur) {
 				suiteAnalyseMssg(longeur, str, parts);
 			}
