@@ -129,9 +129,10 @@ public class MssgTCP {
 	private static void suiteAnalyseMssg(int longeur, String mssg, String[] parts)
 			throws LengthException, NotSDLException {
 		if (parts.length != longeur) {
-			throw new LengthException(longeur, parts.length, "TCP",mssg);
+			throw new LengthException(longeur, parts.length, "TCP", mssg);
 		}
-		if (!(parts[longeur-1].substring(parts[longeur - 1].length() - 1, parts[longeur - 1].length()).equals("\n"))) {
+		if (!(parts[longeur - 1].substring(parts[longeur - 1].length() - 1, parts[longeur - 1].length())
+				.equals("\n"))) {
 			throw new NotSDLException(mssg, "TCP");
 		}
 	}

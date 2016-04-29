@@ -184,10 +184,14 @@ public class Entite implements Runnable {
 			String tmp = sc.nextLine();
 			tmp = Annexe.removeWhite(tmp);
 			String idm = Annexe.newIdentifiant();
-			tmp += " " + idm;
+			String message = tmp + " " + idm;
 			try {
-				MssgUPD.analyseMssg(tmp);
-				MssgUPD.sendUDP(tmp, this,Main.affichage);
+				if (tmp.equals("GBYE")) {
+					message += " " + Annexe.trouveAdress() + " " + this.portInUDP + " " + this.addrNext + " "
+							+ this.portOutUDP;
+				}
+				MssgUPD.analyseMssg(message, false);
+				MssgUPD.sendUDP(message, this, Main.affichage);
 				this.mssgTransmisAnnneau1.add(idm);
 			} catch (LengthException e) {
 				e.getMessage();

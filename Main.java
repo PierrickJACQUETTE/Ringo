@@ -20,13 +20,14 @@ public class Main {
 	public static boolean affichage;
 
 	public static void main(String[] args) {
-		/*
-		 * if (args.length >= 1) { option = args[1]; if
-		 * (option.equals("--debeug")) {
-		 */ affichage = true;
-		/*
-		 * } else { affichage = false; } }
-		 */ Scanner sc = new Scanner(System.in);
+		affichage = false;
+		// if (args.length >= 1) {
+		// option = args[1];
+		// if (option.equals("--debeug")) {
+		affichage = true;
+		// }
+		// }
+		Scanner sc = new Scanner(System.in);
 		boolean correctAction = false;
 		Entite entite = new Entite();
 		while (!correctAction) {
@@ -88,7 +89,7 @@ public class Main {
 
 			// ------------ MULTI DIFF NON BLOQUANT -----------
 			NetworkInterface interf = NetworkInterface.getByName("eth0"); // wlan0
-			InetAddress group = (Inet4Address) InetAddress.getByName(entite.getAddrMultiDiff(1).replaceAll("/", ""));
+			InetAddress group = (Inet4Address) InetAddress.getByName(entite.getAddrMultiDiff(1));
 			DatagramChannel udp_multi_dc;
 			udp_multi_dc = DatagramChannel.open(StandardProtocolFamily.INET)
 					.setOption(StandardSocketOptions.SO_REUSEADDR, true)

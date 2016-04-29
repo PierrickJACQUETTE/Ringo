@@ -34,8 +34,8 @@ public class Annexe {
 
 	private static boolean isGoodAddrMultiDiff(InetAddress i) {
 		String tmp = i.toString();
-		String[] parts = tmp.split(".");
-		int fisrt = Integer.parseInt(parts[0]);
+		String[] parts = tmp.split("\\.");
+		int fisrt = Integer.parseInt(parts[0].replaceAll("/", ""));
 		if (fisrt < 224 || fisrt > 239) {
 			return false;
 		}
@@ -49,13 +49,13 @@ public class Annexe {
 		}
 		return res + str;
 	}
-	
-	protected static String newIdentifiant(){
-		return new String(""+System.currentTimeMillis());
+
+	protected static String newIdentifiant() {
+		return new String("" + System.currentTimeMillis());
 	}
-	
-	protected static String removeWhite(String tmp){
-		return tmp.replaceAll("[\t ]" ,"");
+
+	protected static String removeWhite(String tmp) {
+		return tmp.replaceAll("[\t ]", "");
 	}
 
 	protected static String substringLast(String str) {
@@ -63,20 +63,33 @@ public class Annexe {
 	}
 
 	protected static String convertIPV4Complete(String textAddr) {
-		String[] parts = textAddr.split("\\.");
-		String addrComplete = "";
-		for (String s : parts) {
-			int i = Integer.parseInt(s);
-			if ((i >= 0) && (i < 10)) {
-				addrComplete += addZero(s, 2);
-			} else if (i >= 10 && i < 99) {
-				addrComplete += addZero(s, 1);
-			} else {
-				addrComplete += addZero(s, 0);
+		try {
+			InetAddress ia = (Inet4Address) InetAddress.getByName(textAddr);
+			String debut = "";
+			if (ia.toString().charAt(0) != '/') {
+				String[] partie = ia.toString().split("/");
+				textAddr = partie[1];
+				debut = partie[0] + "/";
 			}
-			addrComplete += ".";
+			String[] parts = textAddr.split("\\.");
+			String addrComplete = "";
+			for (String s : parts) {
+				int i = Integer.parseInt(s);
+				if ((i >= 0) && (i < 10)) {
+					addrComplete += addZero(s, 2);
+				} else if (i >= 10 && i < 99) {
+					addrComplete += addZero(s, 1);
+				} else {
+					addrComplete += addZero(s, 0);
+				}
+				addrComplete += ".";
+			}
+
+			return debut + addrComplete.substring(0, addrComplete.length() - 1);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
 		}
-		return addrComplete.substring(0, addrComplete.length() - 1);
+		return null;
 	}
 
 	protected static String trouveAdress() {
@@ -129,11 +142,21 @@ public class Annexe {
 		return true;
 	}
 
+	private static boolean complAdrr(String str) {
+		String[] parts = str.split("\\.");
+		return (parts.length == 4) ? true : false;
+	}
+
 	protected static boolean verifAddress(String str, boolean isIPV4) {
 		try {
 			if (isIPV4) {
 				InetAddress i = (Inet4Address) InetAddress.getByName(str);
-				return isGoodAddrMultiDiff(i);
+				if (i.toString().charAt(0) == '/') {
+					if (complAdrr(str) == false) {
+						return false;
+					}
+					return isGoodAddrMultiDiff(i);
+				}
 			} else {
 				InetAddress.getByName(str);
 			}
@@ -148,17 +171,23 @@ public class Annexe {
 	}
 
 	protected static Entite initEntite(Entite entite, Scanner sc) {
-		/*
-		 * boolean correct = false; String reponse = ""; while (!correct) {
-		 * System.out.println("Veuillez entrer son numero du port UDP : ");
-		 * reponse = sc.nextLine(); correct = Annexe.verifNombre(reponse, true);
-		 * } entite.setPortInUDP(Annexe.entier(reponse));
-		 * entite.setPortOutUDP(Annexe.entier(reponse)); correct = false; while
-		 * (!correct) { System.out.println(
-		 * "Veuillez entrer son numero du port TCP : "); reponse =
-		 * sc.nextLine(); correct = Annexe.verifNombre(reponse, false); }
-		 * entite.setPortTCPIn(Annexe.entier(reponse));
-		 */
+
+		// boolean correct = false;
+		// String reponse = "";
+		// while (!correct) {
+		// System.out.println("Veuillez entrer son numero du port UDP : ");
+		// reponse = sc.nextLine();
+		// correct = Annexe.verifNombre(reponse, true);
+		// }
+		// entite.setPortInUDP(Annexe.entier(reponse));
+		// entite.setPortOutUDP(Annexe.entier(reponse));
+		// correct = false;
+		// while (!correct) {
+		// System.out.println("Veuillez entrer son numero du port TCP : ");
+		// reponse = sc.nextLine();
+		// correct = Annexe.verifNombre(reponse, false);
+		// }
+		// entite.setPortTCPIn(Annexe.entier(reponse));
 
 		String tmp = entite.getPortInUDP() + "" + entite.getPortTCPIn();
 		entite.setIdentifiant(tmp);
