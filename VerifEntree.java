@@ -15,9 +15,8 @@ public class VerifEntree {
 		 * while (!correct) { System.out.println(
 		 * "Veuillez entrer l'adresse multi-diff : "); reponse = sc.nextLine();
 		 * correct = Annexe.verifAddress(reponse, true); }
-		  entite.setAddrMultiDiff(Annexe.convertIPV4Complete(reponse), 1);
-*/
-
+		 * entite.setAddrMultiDiff(Annexe.convertIPV4Complete(reponse), 1);
+		 */
 
 		System.out.println("Vous venez de créer une entité avec ses attributs : ");
 		entite.printEntiteSimple();
@@ -27,23 +26,17 @@ public class VerifEntree {
 	protected static Entite rejoindreAnneau(Entite entite, Scanner sc, boolean affichage) {
 		String reponse = "";
 		entite = Annexe.initEntite(entite, sc);
-/*		boolean correct = false;
-		while (!correct) {
-			System.out.println("Veuillez entrer l'adresse Ip de l'entité ou se connecter: ");
-			reponse = sc.nextLine();
-			correct = Annexe.verifAddress(reponse, false);
-		}
-		entite.setAddrNext(Annexe.convertIPV4Complete(reponse));
-		correct = false;
-		while (!correct) {
-			System.out.println("Veuillez entrer le port TCP de l'entité ou se connecter: ");
-			reponse = sc.nextLine();
-			correct = Annexe.verifNombre(reponse, false);
-		}
-		entite.setPortTCPOut(Annexe.entier(reponse));
-*/
+		/*
+		 * boolean correct = false; while (!correct) { System.out.println(
+		 * "Veuillez entrer l'adresse Ip de l'entité ou se connecter: ");
+		 * reponse = sc.nextLine(); correct = Annexe.verifAddress(reponse,
+		 * false); } entite.setAddrNext(Annexe.convertIPV4Complete(reponse));
+		 * correct = false; while (!correct) { System.out.println(
+		 * "Veuillez entrer le port TCP de l'entité ou se connecter: "); reponse
+		 * = sc.nextLine(); correct = Annexe.verifNombre(reponse, false); }
+		 * entite.setPortTCPOut(Annexe.entier(reponse));
+		 */
 
-		
 		if (affichage) {
 			System.out.println("Vous venez de créer une entité avec ses attributs : ");
 			entite.printEntiteSimple();

@@ -23,7 +23,25 @@ public class Annexe {
 	private static boolean sup0(int i) {
 		return (i > 0) ? true : false;
 	}
-	
+
+	private static boolean sup1023(int i) {
+		return (i > 1023) ? true : false;
+	}
+
+	private static boolean inf65636(int i) {
+		return (i < 65636) ? true : false;
+	}
+
+	private static boolean isGoodAddrMultiDiff(InetAddress i) {
+		String tmp = i.toString();
+		String[] parts = tmp.split(".");
+		int fisrt = Integer.parseInt(parts[0]);
+		if (fisrt < 224 || fisrt > 239) {
+			return false;
+		}
+		return true;
+	}
+
 	private static String addZero(String str, int nbrZero) {
 		String res = "";
 		for (int i = 0; i < nbrZero; i++) {
@@ -31,11 +49,11 @@ public class Annexe {
 		}
 		return res + str;
 	}
-	
-	protected static String substringLast(String str){
-		return str.substring(0,str.length());
+
+	protected static String substringLast(String str) {
+		return str.substring(0, str.length() - 1);
 	}
-	
+
 	protected static String convertIPV4Complete(String textAddr) {
 		String[] parts = textAddr.split("\\.");
 		String addrComplete = "";
@@ -52,8 +70,8 @@ public class Annexe {
 		}
 		return addrComplete.substring(0, addrComplete.length() - 1);
 	}
-	
-	protected static String trouveAdress(){
+
+	protected static String trouveAdress() {
 		try {
 			Enumeration<NetworkInterface> listNi = NetworkInterface.getNetworkInterfaces();
 			while (listNi.hasMoreElements()) {
@@ -79,16 +97,26 @@ public class Annexe {
 			System.out.println("Ce n'est pas un nombre.");
 			return false;
 		}
+		int i = entier(str);
+		if (sup0(i) == false) {
+			System.out.println("Le nombre doit etre superieur a 0.");
+			return false;
+		}
+		if (sup1023(i) == false) {
+			System.out.println("Le nombre doit etre superieur a 1023.");
+			return false;
+		}
 		if (isUDP) {
-			int i = entier(str);
 			if (inf9999(i) == false) {
 				System.out.println("Le nombre doit etre inferieur a 9999.");
 				return false;
 			}
-			if (sup0(i) == false) {
-				System.out.println("Le nombre doit etre superieur a 0.");
+		} else {
+			if (inf65636(i) == false) {
+				System.out.println("Le nombre doit etre inferieur a 65636.");
 				return false;
 			}
+
 		}
 		return true;
 	}
@@ -97,6 +125,7 @@ public class Annexe {
 		try {
 			if (isIPV4) {
 				InetAddress i = (Inet4Address) InetAddress.getByName(str);
+				return isGoodAddrMultiDiff(i);
 			} else {
 				InetAddress.getByName(str);
 			}
@@ -111,28 +140,21 @@ public class Annexe {
 	}
 
 	protected static Entite initEntite(Entite entite, Scanner sc) {
-/*		boolean correct = false;
-		String reponse = "";
-		while (!correct) {
-			System.out.println("Veuillez entrer son numero du port UDP : ");
-			reponse = sc.nextLine();
-			correct = Annexe.verifNombre(reponse, true);
-		}
-		entite.setPortInUDP(Annexe.entier(reponse));
-		entite.setPortOutUDP(Annexe.entier(reponse));
-		correct = false;
-		while (!correct) {
-			System.out.println("Veuillez entrer son numero du port TCP : ");
-			reponse = sc.nextLine();
-			correct = Annexe.verifNombre(reponse, false);
-		}
-		entite.setPortTCPIn(Annexe.entier(reponse));
-	*/
-		
-		String tmp = entite.getPortInUDP()+""+entite.getPortTCPIn();
+		/*
+		 * boolean correct = false; String reponse = ""; while (!correct) {
+		 * System.out.println("Veuillez entrer son numero du port UDP : ");
+		 * reponse = sc.nextLine(); correct = Annexe.verifNombre(reponse, true);
+		 * } entite.setPortInUDP(Annexe.entier(reponse));
+		 * entite.setPortOutUDP(Annexe.entier(reponse)); correct = false; while
+		 * (!correct) { System.out.println(
+		 * "Veuillez entrer son numero du port TCP : "); reponse =
+		 * sc.nextLine(); correct = Annexe.verifNombre(reponse, false); }
+		 * entite.setPortTCPIn(Annexe.entier(reponse));
+		 */
+
+		String tmp = entite.getPortInUDP() + "" + entite.getPortTCPIn();
 		entite.setIdentifiant(Long.parseLong(tmp));
 		return entite;
 	}
-
 
 }

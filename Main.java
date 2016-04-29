@@ -48,7 +48,7 @@ public class Main {
 				correctAction = true;
 
 				entite.setPortMultiDiff(7003, 1);
-				entite.setAddrMultiDiff("239.255.000.002", 1);
+				entite.setAddrMultiDiff("239.255.000.003", 1);
 				entite.setPortInUDP(7001);
 				entite.setPortOutUDP(7001);
 				entite.setPortTCPIn(7000);
@@ -73,44 +73,8 @@ public class Main {
 					entite.setPortOutUDP(6002);
 
 				}
-
 				entite = VerifEntree.rejoindreAnneau(entite, sc, affichage);
-
-				try {
-					Socket socket_tcp = new Socket(entite.getAddrNext(), entite.getPortTCPOut());
-					BufferedReader br = new BufferedReader(new InputStreamReader(socket_tcp.getInputStream()));
-					String message = br.readLine();
-					// WELC
-					message = Annexe.substringLast(message);
-					if (affichage) {
-						System.out.println("Recu de : " + message);
-					}
-					String[] parts = message.split(" ");
-					entite.setAddrNext(parts[1]);
-					entite.setPortOutUDP(Integer.parseInt(parts[2]));
-					entite.setAddrMultiDiff(parts[3], 1);
-					entite.setPortMultiDiff(Integer.parseInt(parts[4]), 1);
-					PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(socket_tcp.getOutputStream()));
-					String newc = "NEWC " + Annexe.trouveAdress() + " " + entite.getPortInUDP() + "\n";
-					tcp_pw.print(newc);
-					tcp_pw.flush();
-					if (affichage) {
-						System.out.println("Envoi de : " + newc);
-					}
-					// ackc
-					message = br.readLine();
-					message = Annexe.substringLast(message);
-					if (affichage) {
-						System.out.println("Recu de : " + message);
-					}
-					socket_tcp.close();
-					if (affichage) {
-						System.out.println("Fin de connection TCP");
-						entite.printEntiteSimple();
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				entite = MssgTCP.insertNouveauTCP(affichage, entite);
 			} else {
 				System.out.println("Erreur de frappe, recommencez");
 			}
@@ -182,57 +146,13 @@ public class Main {
 						buff.clear();
 
 					} else if (sk.isAcceptable() && sk.channel() == tcp_in_ssc) {
-						if (affichage) {
-							System.out.println("Evenement sur TCP");
-						}
-						Socket sock_tcp = tcp_in_ssc.socket().accept();
-						if (affichage) {
-							System.out.println("Acceptation TCP");
-						}
-						PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(sock_tcp.getOutputStream()));
-						String welc = "WELC " + entite.getAddrNext() + " " + entite.getPortOutUDP() + " "
-								+ entite.getAddrMultiDiff(1) + " " + entite.getPortMultiDiff(1) + "\n";
-						tcp_pw.print(welc);
-						tcp_pw.flush();
-						if (affichage) {
-							System.out.println("Envoi de : " + welc);
-						}
-						BufferedReader tcp_br = new BufferedReader(new InputStreamReader(sock_tcp.getInputStream()));
-						// newc
-						String lu = tcp_br.readLine();
-						lu = Annexe.substringLast(lu);
-						if (affichage) {
-							System.out.println("Recu  de : " + lu);
-						}
-						String parts[] = lu.split(" ");
-						String futurAddrUDPOut = parts[1];
-						String futurPortUDPOut = parts[2];
-						String ackc = "ACKC\n";
-						tcp_pw.print(ackc);
-						tcp_pw.flush();
-						if (affichage) {
-							System.out.println("Envoi de : " + ackc);
-						}
-						entite.setAddrNext(futurAddrUDPOut);
-						entite.setPortOutUDP(Integer.parseInt(futurPortUDPOut));
-
-						tcp_br.close();
-						tcp_pw.close();
-						sock_tcp.close();
-						if (affichage) {
-							System.out.println("Fin de connection TCP");
-							entite.printEntiteSimple();
-						}
+						entite = MssgTCP.insertAnneauTCP(affichage, entite, tcp_in_ssc);
 					} else {
 						System.out.println("Que s'est il passe");
 					}
 				}
 			}
-		} catch (
-
-		Exception e)
-
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
