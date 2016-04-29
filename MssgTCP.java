@@ -49,11 +49,11 @@ public class MssgTCP {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (LengthException e2) {
-			e2.getMessage();
+		} catch (LengthException e) {
+			e.getMessage();
 			System.exit(0);
-		} catch (NotSDLException e3) {
-			e3.getMessage();
+		} catch (NotSDLException e) {
+			e.getMessage();
 			System.exit(0);
 		}
 		return entite;
@@ -129,9 +129,9 @@ public class MssgTCP {
 	private static void suiteAnalyseMssg(int longeur, String mssg, String[] parts)
 			throws LengthException, NotSDLException {
 		if (parts.length != longeur) {
-			throw new LengthException(parts[0], longeur, parts.length, "TCP");
+			throw new LengthException(longeur, parts.length, "TCP",mssg);
 		}
-		if (!(parts[0].substring(parts[longeur - 1].length() - 1, parts[longeur - 1].length()).equals("\n"))) {
+		if (!(parts[longeur-1].substring(parts[longeur - 1].length() - 1, parts[longeur - 1].length()).equals("\n"))) {
 			throw new NotSDLException(mssg, "TCP");
 		}
 	}

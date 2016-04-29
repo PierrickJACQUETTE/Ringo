@@ -1,24 +1,13 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PipedInputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.StandardProtocolFamily;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -28,7 +17,7 @@ import java.util.Scanner;
 public class Main {
 
 	static String option;
-	static boolean affichage;
+	public static boolean affichage;
 
 	public static void main(String[] args) {
 		/*
@@ -135,16 +124,7 @@ public class Main {
 						buff.clear();
 					}
 					if (sk.isReadable() && sk.channel() == udp_in_dc) {
-						if (affichage) {
-							System.out.println("Message UDP  recu");
-						}
-						udp_in_dc.receive(buff);
-						String st = new String(buff.array(), 0, buff.array().length);
-						if (affichage) {
-							System.out.println("Message recu :" + st);
-						}
-						buff.clear();
-
+						entite = MssgUPD.receveUDP(entite, correctAction, udp_in_dc, buff);
 					} else if (sk.isAcceptable() && sk.channel() == tcp_in_ssc) {
 						entite = MssgTCP.insertAnneauTCP(affichage, entite, tcp_in_ssc);
 					} else {

@@ -1,14 +1,9 @@
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Entite implements Runnable {
 
-	private long identifiant;
+	private String identifiant;
 	private int portInUDP;
 	private int portOutUDP;
 	private int portTCPIn;
@@ -17,11 +12,11 @@ public class Entite implements Runnable {
 	private String[] addrMultiDiff;
 	private int[] portMultiDiff;
 	private boolean isDuplicateur;
-	private ArrayList<String> mssgTransmis;
-	private Scanner sc;
+	private ArrayList<String> mssgTransmisAnnneau1;
+	private ArrayList<String> mssgTransmisAnnneau2;
 
 	public Entite() {
-		this.identifiant = -1;
+		this.identifiant = "-1";
 		this.portInUDP = -1;
 		this.portOutUDP = -1;
 		this.portTCPIn = -1;
@@ -32,7 +27,8 @@ public class Entite implements Runnable {
 		this.portMultiDiff[0] = -1;
 		this.portMultiDiff[1] = -1;
 		this.isDuplicateur = false;
-		this.mssgTransmis = new ArrayList<String>();
+		this.mssgTransmisAnnneau1 = new ArrayList<String>();
+		this.mssgTransmisAnnneau2 = new ArrayList<String>();
 	}
 
 	public void printEntiteSimple() {
@@ -50,20 +46,27 @@ public class Entite implements Runnable {
 		System.out.println();
 	}
 
+	private void printMssgAnneau(ArrayList<String> arl) {
+		for (int i = 0; i < arl.size(); i++) {
+			System.out.println(i + " : " + arl.get(i));
+		}
+	}
+
 	public void printEntiteComplex() {
 		printEntiteSimple();
 		System.out.println("Les messages transmis par cette entité sont : ");
-		for (int i = 0; i < this.mssgTransmis.size(); i++) {
-			System.out.println(i + " : " + this.mssgTransmis.get(i));
-		}
+		System.out.println("Sur l'anneau 1 : ");
+		printMssgAnneau(this.mssgTransmisAnnneau1);
+		System.out.println("Sur l'anneau 2 : ");
+		printMssgAnneau(this.mssgTransmisAnnneau2);
 		System.out.println();
 	}
 
-	public long getIdentifiant() {
+	public String getIdentifiant() {
 		return identifiant;
 	}
 
-	public void setIdentifiant(long identifiant) {
+	public void setIdentifiant(String identifiant) {
 		this.identifiant = identifiant;
 	}
 
@@ -159,30 +162,37 @@ public class Entite implements Runnable {
 		this.isDuplicateur = isDuplicateur;
 	}
 
-	public ArrayList<String> getMssgTransmis() {
-		return mssgTransmis;
+	public ArrayList<String> getMssgTransmisAnneau1() {
+		return this.mssgTransmisAnnneau1;
 	}
 
-	public void setMssgTransmis(ArrayList<String> mssgTransmis) {
-		this.mssgTransmis = mssgTransmis;
+	public ArrayList<String> getMssgTransmisAnneau2() {
+		return this.mssgTransmisAnnneau2;
+	}
+
+	public void setMssgTransmisAnneau1(ArrayList<String> mssgTransmis) {
+		this.mssgTransmisAnnneau1 = mssgTransmis;
+	}
+
+	public void setMssgTransmisAnneau2(ArrayList<String> mssgTransmis) {
+		this.mssgTransmisAnnneau2 = mssgTransmis;
 	}
 
 	public void run() {
 		while (true) {
 			Scanner sc = new Scanner(System.in);
 			String tmp = sc.nextLine();
-			System.out.println("message :" + tmp);
+			tmp = Annexe.removeWhite(tmp);
+			String idm = Annexe.newIdentifiant();
+			tmp += " " + idm;
 			try {
-				DatagramSocket dso = new DatagramSocket();
-				byte[] data;
-				data = tmp.getBytes();
-				InetSocketAddress ia = new InetSocketAddress(this.addrNext, this.portOutUDP);
-				DatagramPacket paquet = new DatagramPacket(data, data.length, ia);
-				dso.send(paquet);
-			} catch (SocketException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
+				MssgUPD.analyseMssg(tmp);
+				MssgUPD.sendUDP(tmp, this,Main.affichage);
+				this.mssgTransmisAnnneau1.add(idm);
+			} catch (LengthException e) {
+				e.getMessage();
+			} catch (MssgSpellCheck e) {
+				e.getMessage();
 			}
 		}
 	}

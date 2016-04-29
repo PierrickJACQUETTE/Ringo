@@ -49,6 +49,14 @@ public class Annexe {
 		}
 		return res + str;
 	}
+	
+	protected static String newIdentifiant(){
+		return new String(""+System.currentTimeMillis());
+	}
+	
+	protected static String removeWhite(String tmp){
+		return tmp.replaceAll("[\t ]" ,"");
+	}
 
 	protected static String substringLast(String str) {
 		return str.substring(0, str.length() - 1);
@@ -153,7 +161,7 @@ public class Annexe {
 		 */
 
 		String tmp = entite.getPortInUDP() + "" + entite.getPortTCPIn();
-		entite.setIdentifiant(Long.parseLong(tmp));
+		entite.setIdentifiant(tmp);
 		return entite;
 	}
 
