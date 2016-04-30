@@ -32,6 +32,8 @@ public class MssgUPD {
 				mssgTEST(st, parts, entite);
 			} else if (parts[0].equals("SUPP")) {
 				mssgSUPP(st, parts, entite);
+			} else if (parts[0].equals("APPL")) {
+				mssgAPPL(st, parts, entite);
 			}
 			buff.clear();
 		} catch (LengthException | MssgSpellCheck e) {
@@ -129,6 +131,15 @@ public class MssgUPD {
 
 	}
 
+	private static void mssgAPPL(String message, String[] parts, Entite entite) {
+		String idm = parts[1];
+		if (entite.getMssgTransmisAnneau1().contains(idm)) {
+			removeMssg(idm, entite);
+		} else {
+			sendUDP(message, entite, idm);
+		}
+	}
+
 	protected static void sendUDP(String tmp, Entite entite, String idm) {
 		try {
 			DatagramSocket dso = new DatagramSocket();
@@ -170,6 +181,19 @@ public class MssgUPD {
 			if (parts.length == longeur) {
 				suiteAnalyseMssg(longeur, str, parts);
 			}
+
+		} else if (parts[0].equals("APPL")) {
+			int longeur = 5;
+			if (parts.length == longeur) {
+				suiteAnalyseMssg(longeur, str, parts);
+			}
+			if (!parts[2].equals("DIFF####")) {
+				throw new MssgSpellCheck(parts[2]);
+			}
+			longeur = 512 - 4 - 1 - 8 - 1 - 8 - 1 - 3 - 1;
+			if (parts[4].length() > longeur) {
+				throw new LengthException(longeur, parts[4].length(), str);
+			}
 		} else if (parts[0].equals("SUPP") && isPrivate == true) {
 			int longeur = 3;
 			if (parts.length == longeur) {
@@ -180,7 +204,7 @@ public class MssgUPD {
 		}
 	}
 
-	private static void suiteAnalyseMssg(int longeur, String mssg, String[] parts) throws LengthException {
+	protected static void suiteAnalyseMssg(int longeur, String mssg, String[] parts) throws LengthException {
 		if (parts.length != longeur) {
 			throw new LengthException(longeur, parts.length, "UDP", mssg);
 		}

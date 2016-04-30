@@ -111,7 +111,7 @@ public class Main {
 
 			while (true) {
 				if (affichage) {
-					System.out.println("Waiting for messages");
+					System.out.println("Waiting for messages : WHOS, GBYE, TEST, APPL DIFF mess");
 				}
 				selector.select();
 				Iterator<SelectionKey> it = selector.selectedKeys().iterator();

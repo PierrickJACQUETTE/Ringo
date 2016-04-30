@@ -188,10 +188,19 @@ public class Entite implements Runnable {
 		while (true) {
 			Scanner sc = new Scanner(System.in);
 			String tmp = sc.nextLine();
-			tmp = Annexe.removeWhite(tmp);
-			String idm = Annexe.newIdentifiant();
-			String message = tmp + " " + idm;
+			String[] suite = null;
 			try {
+				if (tmp.contains("APPL")) {
+					suite = tmp.split(" ");
+					if (suite.length < 3) {
+						MssgUPD.suiteAnalyseMssg(3, tmp, suite);
+					}
+					tmp = suite[0];
+				}
+				tmp = Annexe.removeWhite(tmp);
+				String idm = Annexe.newIdentifiant();
+				String message = tmp + " " + idm;
+
 				if (tmp.equals("GBYE")) {
 					message += " " + Annexe.trouveAdress() + " " + this.portInUDP + " " + this.addrNext + " "
 							+ this.portOutUDP;
@@ -200,6 +209,22 @@ public class Entite implements Runnable {
 					// TimeTest t = new TimeTest(idm,
 					// System.currentTimeMillis());
 					this.aLL.add(Long.parseLong(idm));
+				} else if (tmp.equals("APPL")) {
+					message += " " + suite[1] + "#### ";
+					String textemssg = "";
+					int size = 0;
+					for (String s : suite) {
+						size += s.length() + 1;
+						textemssg += s + " ";
+					}
+					textemssg.substring(0, textemssg.length() - 1);
+					size--;
+					if (size < 10) {
+						size = Integer.parseInt(Annexe.addZero("" + size, 2));
+					} else if (size < 100) {
+						size = Integer.parseInt(Annexe.addZero("" + size, 1));
+					}
+					message += size + " " + textemssg;
 				}
 				MssgUPD.analyseMssg(message, false);
 				MssgUPD.sendUDP(message, this, idm);

@@ -42,7 +42,7 @@ public class Annexe {
 		return true;
 	}
 
-	private static String addZero(String str, int nbrZero) {
+	protected static String addZero(String str, int nbrZero) {
 		String res = "";
 		for (int i = 0; i < nbrZero; i++) {
 			res += "0";

@@ -5,4 +5,9 @@ public class LengthException extends Exception {
 				+ " et " + lengthAttendu + " sont attendus pour le message " + message);
 	}
 
+	public LengthException(int lengthAttendu, int lengthReel, String message) {
+		System.out.println("Erreur dans la longueur du message en UPD vaut :" + lengthReel + " et " + lengthAttendu
+				+ " sont attendus pour le message " + message);
+	}
+
 }
