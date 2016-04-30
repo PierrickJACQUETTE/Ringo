@@ -5,7 +5,7 @@ public class VerifEntree {
 	protected static Entite nouveauAnneau(Entite entite, Scanner sc) {
 		String reponse = "";
 		entite = Annexe.initEntite(entite, sc);
-		entite.setAddrNext(Annexe.trouveAdress());
+		entite.setAddrNext(Annexe.trouveAdress(), 1);
 		boolean correct = false;
 
 		// while (!correct) {
@@ -35,7 +35,7 @@ public class VerifEntree {
 		// boolean correct = false; while (!correct) { System.out.println(
 		// "Veuillez entrer l'adresse Ip de l'entité ou se connecter: ");
 		// reponse = sc.nextLine(); correct = Annexe.verifAddress(reponse,
-		// false); } entite.setAddrNext(Annexe.convertIPV4Complete(reponse));
+		// false); } entite.setAddrNext(Annexe.convertIPV4Complete(reponse),1);
 		// correct = false; while (!correct) { System.out.println(
 		// "Veuillez entrer le port TCP de l'entité ou se connecter: "); reponse
 		// = sc.nextLine(); correct = Annexe.verifNombre(reponse, false); }
@@ -46,7 +46,6 @@ public class VerifEntree {
 			System.out.println("Vous venez de créer une entité avec ses attributs : ");
 			entite.printEntiteSimple();
 		}
-
 		return entite;
 	}
 }

@@ -10,7 +10,7 @@ public class MssgTCP {
 
 	protected static Entite insertNouveauTCP(Entite entite) {
 		try {
-			Socket socket_tcp = new Socket(entite.getAddrNext(), entite.getPortTCPOut());
+			Socket socket_tcp = new Socket(entite.getAddrNext(1), entite.getPortTCPOut());
 			BufferedReader br = new BufferedReader(new InputStreamReader(socket_tcp.getInputStream()));
 			PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(socket_tcp.getOutputStream()));
 			char[] data = new char[512];
@@ -23,8 +23,8 @@ public class MssgTCP {
 			analyseMssg(message, tcp_pw);
 			message = Annexe.substringLast(message);
 			String[] parts = message.split(" ");
-			entite.setAddrNext(parts[1]);
-			entite.setPortOutUDP(Integer.parseInt(parts[2]));
+			entite.setAddrNext(parts[1], 1);
+			entite.setPortOutUDP(Integer.parseInt(parts[2]), 1);
 			entite.setAddrMultiDiff(parts[3], 1);
 			entite.setPortMultiDiff(Integer.parseInt(parts[4]), 1);
 			String newc = "NEWC " + Annexe.trouveAdress() + " " + entite.getPortInUDP() + "\n";
@@ -67,7 +67,7 @@ public class MssgTCP {
 			System.out.println("Acceptation TCP");
 		}
 		PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(sock_tcp.getOutputStream()));
-		String welc = "WELC " + entite.getAddrNext() + " " + entite.getPortOutUDP() + " " + entite.getAddrMultiDiff(1)
+		String welc = "WELC " + entite.getAddrNext(1) + " " + entite.getPortOutUDP(1) + " " + entite.getAddrMultiDiff(1)
 				+ " " + entite.getPortMultiDiff(1) + "\n";
 		tcp_pw.print(welc);
 		tcp_pw.flush();
@@ -94,8 +94,8 @@ public class MssgTCP {
 			if (Main.affichage) {
 				System.out.println("Envoi de : " + ackc);
 			}
-			entite.setAddrNext(futurAddrUDPOut);
-			entite.setPortOutUDP(Integer.parseInt(futurPortUDPOut));
+			entite.setAddrNext(futurAddrUDPOut, 1);
+			entite.setPortOutUDP(Integer.parseInt(futurPortUDPOut), 1);
 		} else {
 			erreur = true;
 		}

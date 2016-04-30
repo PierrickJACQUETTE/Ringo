@@ -90,12 +90,12 @@ public class MssgUPD {
 		String idm = parts[1];
 		if (entite.getMssgTransmisAnneau1().contains(idm)) {
 			removeMssg(idm, entite);
-		} else if (Annexe.trouveAdress().equals(parts[2]) && entite.getPortOutUDP() == Integer.parseInt(parts[3])) {
+		} else if (Annexe.trouveAdress().equals(parts[2]) && entite.getPortOutUDP(1) == Integer.parseInt(parts[3])) {
 			Entite tmp = new Entite();
-			tmp.setAddrNext(entite.getAddrNext());
-			tmp.setPortOutUDP(entite.getPortOutUDP());
-			entite.setAddrNext(parts[4]);
-			entite.setPortOutUDP(Integer.parseInt(parts[5]));
+			tmp.setAddrNext(entite.getAddrNext(1), 1);
+			tmp.setPortOutUDP(entite.getPortOutUDP(1), 1);
+			entite.setAddrNext(parts[4], 1);
+			entite.setPortOutUDP(Integer.parseInt(parts[5]), 1);
 			String idmNew = Annexe.newIdentifiant();
 			message = "EYBG" + " " + idmNew;
 			sendUDP(message, tmp, idm);
@@ -145,7 +145,7 @@ public class MssgUPD {
 			DatagramSocket dso = new DatagramSocket();
 			byte[] data;
 			data = tmp.getBytes();
-			InetSocketAddress ia = new InetSocketAddress(entite.getAddrNext(), entite.getPortOutUDP());
+			InetSocketAddress ia = new InetSocketAddress(entite.getAddrNext(1), entite.getPortOutUDP(1));
 			DatagramPacket paquet = new DatagramPacket(data, data.length, ia);
 			dso.send(paquet);
 			if (Main.affichage) {

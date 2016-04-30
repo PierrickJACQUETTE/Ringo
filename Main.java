@@ -41,7 +41,7 @@ public class Main {
 				entite.setPortMultiDiff(7003, 1);
 				entite.setAddrMultiDiff("239.255.000.003", 1);
 				entite.setPortInUDP(7001);
-				entite.setPortOutUDP(7001);
+				entite.setPortOutUDP(7001,1);
 				entite.setPortTCPIn(7000);
 
 				entite = VerifEntree.nouveauAnneau(entite, sc);
@@ -50,18 +50,18 @@ public class Main {
 				System.out.println("Voulez un U ou D ?");
 				reponse = sc.nextLine();
 				if (reponse.equals("U")) {
-					entite.setAddrNext("127.000.000.001");
+					entite.setAddrNext("127.000.000.001",1);
 					entite.setPortTCPOut(7000);
 					entite.setPortTCPIn(6999);
 					entite.setPortInUDP(7002);
-					entite.setPortOutUDP(7005);
+					entite.setPortOutUDP(7005,1);
 				} else {
 
-					entite.setAddrNext("127.000.000.006");
+					entite.setAddrNext("127.000.000.006",1);
 					entite.setPortTCPOut(6999);
 					entite.setPortTCPIn(6000);
 					entite.setPortInUDP(6001);
-					entite.setPortOutUDP(6002);
+					entite.setPortOutUDP(6002,1);
 
 				}
 				entite = VerifEntree.rejoindreAnneau(entite, sc);

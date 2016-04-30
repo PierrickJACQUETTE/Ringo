@@ -180,7 +180,7 @@ public class Annexe {
 		// correct = Annexe.verifNombre(reponse, true);
 		// }
 		// entite.setPortInUDP(Annexe.entier(reponse));
-		// entite.setPortOutUDP(Annexe.entier(reponse));
+		// entite.setPortOutUDP(Annexe.entier(reponse),1);
 		// correct = false;
 		// while (!correct) {
 		// System.out.println("Veuillez entrer son numero du port TCP : ");

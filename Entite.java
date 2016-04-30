@@ -5,10 +5,10 @@ public class Entite implements Runnable {
 
 	private String identifiant;
 	private int portInUDP;
-	private int portOutUDP;
+	private int[] portOutUDP;
 	private int portTCPIn;
 	private int portTCPOut;
-	private String addrNext;
+	private String[] addrNext;
 	private String[] addrMultiDiff;
 	private int[] portMultiDiff;
 	private boolean isDuplicateur;
@@ -19,10 +19,10 @@ public class Entite implements Runnable {
 	public Entite() {
 		this.identifiant = "-1";
 		this.portInUDP = -1;
-		this.portOutUDP = -1;
+		this.portOutUDP = new int[2];
 		this.portTCPIn = -1;
 		this.portTCPOut = -1;
-		this.addrNext = null;
+		this.addrNext = new String[2];
 		this.addrMultiDiff = new String[2];
 		this.portMultiDiff = new int[2];
 		this.portMultiDiff[0] = -1;
@@ -80,12 +80,26 @@ public class Entite implements Runnable {
 		this.portInUDP = portInUDP;
 	}
 
-	public int getPortOutUDP() {
-		return portOutUDP;
+	public int getPortOutUDP(int i) {
+		int res = 0;
+		if (i == 1) {
+			res = this.portOutUDP[0];
+		} else if (i == 2) {
+			res = this.portOutUDP[1];
+		} else {
+			System.err.println("Erreur dans getAddrMultiDiff anneau non reconnue");
+		}
+		return res;
 	}
 
-	public void setPortOutUDP(int portOutUDP) {
-		this.portOutUDP = portOutUDP;
+	public void setPortOutUDP(int portOutUDP, int i) {
+		if (i == 1) {
+			this.portOutUDP[0] = portOutUDP;
+		} else if (i == 2) {
+			this.portOutUDP[1] = portOutUDP;
+		} else {
+			System.err.println("Erreur dans setAddrNext anneau non reconnue");
+		}
 	}
 
 	public int getPortTCPIn() {
@@ -104,12 +118,26 @@ public class Entite implements Runnable {
 		this.portTCPOut = portTCP;
 	}
 
-	public String getAddrNext() {
-		return addrNext;
+	public String getAddrNext(int i) {
+		String res = "";
+		if (i == 1) {
+			res = this.addrNext[0];
+		} else if (i == 2) {
+			res = this.addrNext[1];
+		} else {
+			System.err.println("Erreur dans getAddrNext anneau non reconnue");
+		}
+		return res;
 	}
 
-	public void setAddrNext(String addrNext) {
-		this.addrNext = addrNext;
+	public void setAddrNext(String addrNext, int i) {
+		if (i == 1) {
+			this.addrNext[0] = addrNext;
+		} else if (i == 2) {
+			this.addrNext[1] = addrNext;
+		} else {
+			System.err.println("Erreur dans setAddrNext anneau non reconnue");
+		}
 	}
 
 	public String getAddrMultiDiff(int i) {
