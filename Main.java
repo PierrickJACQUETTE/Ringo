@@ -11,16 +11,14 @@ import java.nio.channels.MembershipKey;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Main {
 
-	static String option;
-	public static boolean affichage;
+	private static String option;
+	protected static boolean affichage;
+	protected static final long TIMEMAX = 6000;
 
 	public static void main(String[] args) {
 		affichage = false;
@@ -66,8 +64,8 @@ public class Main {
 					entite.setPortOutUDP(6002);
 
 				}
-				entite = VerifEntree.rejoindreAnneau(entite, sc, affichage);
-				entite = MssgTCP.insertNouveauTCP(affichage, entite);
+				entite = VerifEntree.rejoindreAnneau(entite, sc);
+				entite = MssgTCP.insertNouveauTCP(entite);
 			} else {
 				System.out.println("Erreur de frappe, recommencez");
 			}
@@ -107,34 +105,26 @@ public class Main {
 			Thread scanner_in = new Thread(entite);
 			scanner_in.start();
 
+			MssgMultDiff mssg = new MssgMultDiff(entite);
+			Thread verifMultiDiff = new Thread(mssg);
+			verifMultiDiff.start();
+
 			while (true) {
 				if (affichage) {
 					System.out.println("Waiting for messages");
 				}
-				final Entite entite1 = entite;
-				TimerTask task = new TimerTask() {
-					@Override
-					public void run() {
-						MssgMultDiff.declencheMultiDiff(entite1, affichage);
-					}
-				};
-
-				Timer timer = new Timer();
-				TimeTest t = new TimeTest("", 0);
-				timer.scheduleAtFixedRate(task, 0, t.getMaxTime());
-
 				selector.select();
 				Iterator<SelectionKey> it = selector.selectedKeys().iterator();
 				while (it.hasNext()) {
 					SelectionKey sk = it.next();
 					it.remove();
 					if (sk.isReadable() && sk.channel() == udp_multi_dc) {
-						MssgMultDiff.receiveMultiDiff(affichage, buff, udp_multi_dc);
+						MssgMultDiff.receiveMultiDiff(buff, udp_multi_dc);
 					}
 					if (sk.isReadable() && sk.channel() == udp_in_dc) {
-						entite = MssgUPD.receveUDP(entite, affichage, udp_in_dc, buff);
+						entite = MssgUPD.receveUDP(entite, udp_in_dc, buff);
 					} else if (sk.isAcceptable() && sk.channel() == tcp_in_ssc) {
-						entite = MssgTCP.insertAnneauTCP(affichage, entite, tcp_in_ssc);
+						entite = MssgTCP.insertAnneauTCP(entite, tcp_in_ssc);
 					} else {
 						System.out.println("Que s'est il passe");
 					}

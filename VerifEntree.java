@@ -28,7 +28,7 @@ public class VerifEntree {
 		return entite;
 	}
 
-	protected static Entite rejoindreAnneau(Entite entite, Scanner sc, boolean affichage) {
+	protected static Entite rejoindreAnneau(Entite entite, Scanner sc) {
 		String reponse = "";
 		entite = Annexe.initEntite(entite, sc);
 		//
@@ -42,7 +42,7 @@ public class VerifEntree {
 		// entite.setPortTCPOut(Annexe.entier(reponse));
 		//
 
-		if (affichage) {
+		if (Main.affichage) {
 			System.out.println("Vous venez de créer une entité avec ses attributs : ");
 			entite.printEntiteSimple();
 		}

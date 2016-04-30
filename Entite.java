@@ -14,7 +14,7 @@ public class Entite implements Runnable {
 	private boolean isDuplicateur;
 	private ArrayList<String> mssgTransmisAnnneau1;
 	private ArrayList<String> mssgTransmisAnnneau2;
-	ArrayList<TimeTest> aLTT;
+	private ArrayList<Long> aLL;
 
 	public Entite() {
 		this.identifiant = "-1";
@@ -30,7 +30,7 @@ public class Entite implements Runnable {
 		this.isDuplicateur = false;
 		this.mssgTransmisAnnneau1 = new ArrayList<String>();
 		this.mssgTransmisAnnneau2 = new ArrayList<String>();
-		aLTT = new ArrayList<TimeTest>();
+		this.aLL = new ArrayList<Long>();
 	}
 
 	public void printEntiteSimple() {
@@ -168,16 +168,20 @@ public class Entite implements Runnable {
 		return this.mssgTransmisAnnneau1;
 	}
 
-	public ArrayList<String> getMssgTransmisAnneau2() {
-		return this.mssgTransmisAnnneau2;
-	}
-
 	public void setMssgTransmisAnneau1(ArrayList<String> mssgTransmis) {
 		this.mssgTransmisAnnneau1 = mssgTransmis;
 	}
 
+	public ArrayList<String> getMssgTransmisAnneau2() {
+		return this.mssgTransmisAnnneau2;
+	}
+
 	public void setMssgTransmisAnneau2(ArrayList<String> mssgTransmis) {
 		this.mssgTransmisAnnneau2 = mssgTransmis;
+	}
+
+	public ArrayList<Long> getALL() {
+		return this.aLL;
 	}
 
 	public void run() {
@@ -193,11 +197,12 @@ public class Entite implements Runnable {
 							+ this.portOutUDP;
 				} else if (tmp.equals("TEST")) {
 					message += " " + this.addrMultiDiff[0] + " " + this.portMultiDiff[0];
-					TimeTest t = new TimeTest(idm, System.currentTimeMillis());
-					this.aLTT.add(t);
+					// TimeTest t = new TimeTest(idm,
+					// System.currentTimeMillis());
+					this.aLL.add(Long.parseLong(idm));
 				}
 				MssgUPD.analyseMssg(message, false);
-				MssgUPD.sendUDP(message, this, Main.affichage, idm);
+				MssgUPD.sendUDP(message, this, idm);
 				this.mssgTransmisAnnneau1.add(idm);
 			} catch (LengthException e) {
 				e.getMessage();

@@ -1,57 +1,76 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.MulticastSocket;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-import java.sql.Time;
-import java.util.ArrayList;
 
 //pour compiler option -Djava.net.preferIPv4Stack=true FAIRE UN MAKE
 
-public class MssgMultDiff {
+public class MssgMultDiff extends Thread {
 
-	protected static void declencheMultiDiff(Entite entite, boolean affichage) {
-		for (TimeTest tt : entite.aLTT) {
-			if (System.currentTimeMillis() - tt.getTime() > tt.getMaxTime()) {
-				sendMutiDiff(entite, affichage);
-			}
-		}
+	private Entite entite;
+
+	public MssgMultDiff(Entite entite) {
+		this.entite = entite;
 	}
 
-	private static void sendMutiDiff(Entite entite, boolean affichage) {
+	protected void declencheMultiDiff() {
+		for (int i = 0; i < this.entite.getALL().size(); i++) {
+			if (System.currentTimeMillis() - this.entite.getALL().get(i) > Main.TIMEMAX) {
+				this.sendMutiDiff();
+			}
+		}
+
+	}
+
+	private void sendMutiDiff() {
 		try {
 			DatagramSocket dso = new DatagramSocket();
 			byte[] data;
 			String s = "DOWN";
 			data = s.getBytes();
-			InetSocketAddress ia = new InetSocketAddress(entite.getAddrMultiDiff(1), entite.getPortMultiDiff(1));
+			InetSocketAddress ia = new InetSocketAddress(this.entite.getAddrMultiDiff(1),
+					this.entite.getPortMultiDiff(1));
 			DatagramPacket paquet = new DatagramPacket(data, data.length, ia);
 			dso.send(paquet);
-			if (affichage) {
+			if (Main.affichage) {
 				System.out.println("Message multi diff envoyé : " + s);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+
 		}
 	}
 
-	protected static void receiveMultiDiff(boolean affichage, ByteBuffer buff, DatagramChannel udp_multi_dc) {
+	protected static void receiveMultiDiff(ByteBuffer buff, DatagramChannel udp_multi_dc) {
 		try {
-			if (affichage) {
+			if (Main.affichage) {
 				System.out.println("Message UDP multi diff recu");
 			}
 			udp_multi_dc.receive(buff);
-			String st = new String(buff.array(), 0, buff.array().length);
-			if (affichage) {
-				System.out.println("Message recu :" + st);
+			String st = new String(buff.array(), 0, buff.array().length).trim();
+			if (Main.affichage) {
+				System.out.println("Message recu : " + st);
 			}
 			buff.clear();
 			System.exit(0);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void run() {
+		boolean stop = false;
+		while (!stop) {
+			this.declencheMultiDiff();
+			try {
+				sleep(Main.TIMEMAX);
+			} catch (InterruptedException e) {
+				stop = true;
+				e.printStackTrace();
+			}
 		}
 	}
 }

@@ -4,12 +4,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.nio.CharBuffer;
 import java.nio.channels.ServerSocketChannel;
 
 public class MssgTCP {
 
-	protected static Entite insertNouveauTCP(boolean affichage, Entite entite) {
+	protected static Entite insertNouveauTCP(Entite entite) {
 		try {
 			Socket socket_tcp = new Socket(entite.getAddrNext(), entite.getPortTCPOut());
 			BufferedReader br = new BufferedReader(new InputStreamReader(socket_tcp.getInputStream()));
@@ -18,7 +17,7 @@ public class MssgTCP {
 			int mssg = br.read(data);
 			String message = new String(data, 0, mssg);
 			// WELC
-			if (affichage) {
+			if (Main.affichage) {
 				System.out.println("Recu de : " + message);
 			}
 			analyseMssg(message, tcp_pw);
@@ -31,19 +30,19 @@ public class MssgTCP {
 			String newc = "NEWC " + Annexe.trouveAdress() + " " + entite.getPortInUDP() + "\n";
 			tcp_pw.print(newc);
 			tcp_pw.flush();
-			if (affichage) {
+			if (Main.affichage) {
 				System.out.println("Envoi de : " + newc);
 			}
 			// ackc
 			mssg = br.read(data);
 			message = new String(data, 0, mssg);
-			if (affichage) {
+			if (Main.affichage) {
 				System.out.println("Recu de : " + message);
 			}
 			analyseMssg(message, tcp_pw);
 			message = Annexe.substringLast(message);
 			socket_tcp.close();
-			if (affichage) {
+			if (Main.affichage) {
 				System.out.println("Fin de connection TCP");
 				entite.printEntiteSimple();
 			}
@@ -59,13 +58,12 @@ public class MssgTCP {
 		return entite;
 	}
 
-	protected static Entite insertAnneauTCP(boolean affichage, Entite entite, ServerSocketChannel tcp_in_ssc)
-			throws IOException {
-		if (affichage) {
+	protected static Entite insertAnneauTCP(Entite entite, ServerSocketChannel tcp_in_ssc) throws IOException {
+		if (Main.affichage) {
 			System.out.println("Evenement sur TCP");
 		}
 		Socket sock_tcp = tcp_in_ssc.socket().accept();
-		if (affichage) {
+		if (Main.affichage) {
 			System.out.println("Acceptation TCP");
 		}
 		PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(sock_tcp.getOutputStream()));
@@ -73,7 +71,7 @@ public class MssgTCP {
 				+ " " + entite.getPortMultiDiff(1) + "\n";
 		tcp_pw.print(welc);
 		tcp_pw.flush();
-		if (affichage) {
+		if (Main.affichage) {
 			System.out.println("Envoi de : " + welc);
 		}
 		BufferedReader tcp_br = new BufferedReader(new InputStreamReader(sock_tcp.getInputStream()));
@@ -83,7 +81,7 @@ public class MssgTCP {
 		boolean erreur = false;
 		if (mssg != -1) {
 			String lu = new String(data, 0, mssg);
-			if (affichage) {
+			if (Main.affichage) {
 				System.out.println("Recu  de : " + lu);
 			}
 			lu = Annexe.substringLast(lu);
@@ -93,7 +91,7 @@ public class MssgTCP {
 			String ackc = "ACKC\n";
 			tcp_pw.print(ackc);
 			tcp_pw.flush();
-			if (affichage) {
+			if (Main.affichage) {
 				System.out.println("Envoi de : " + ackc);
 			}
 			entite.setAddrNext(futurAddrUDPOut);
@@ -104,7 +102,7 @@ public class MssgTCP {
 		tcp_br.close();
 		tcp_pw.close();
 		sock_tcp.close();
-		if (affichage) {
+		if (Main.affichage) {
 			System.out.println("Fin de connection TCP");
 			if (erreur) {
 				System.out.println("Erreur lors de l'insertion donc pas d'insertion -- entite inchange\n");
