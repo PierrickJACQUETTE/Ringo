@@ -20,6 +20,8 @@ public class Entite implements Runnable {
 		this.identifiant = "-1";
 		this.portInUDP = -1;
 		this.portOutUDP = new int[2];
+		this.portOutUDP[0] = -1;
+		this.portOutUDP[1] = -1;
 		this.portTCPIn = -1;
 		this.portTCPOut = -1;
 		this.addrNext = new String[2];
@@ -36,10 +38,12 @@ public class Entite implements Runnable {
 	public void printEntiteSimple() {
 		System.out.println("\nIdentifiant : " + this.identifiant);
 		System.out.println("Port In UPD : " + this.portInUDP);
-		System.out.println("Port Out UPD : " + this.portOutUDP);
 		System.out.println("Port TCPIn : " + this.portTCPIn);
 		System.out.println("Port TCPOut : " + this.portTCPOut);
-		System.out.println("Addresse next : " + this.addrNext);
+		for (int i = 0; i < this.addrNext.length; i++) {
+			System.out.println("Addresse next : " + addrNext[i]);
+			System.out.println("Port Out UPD : " + portOutUDP[i]);
+		}
 		System.out.println("L'entite est un duplicateur ? " + this.isDuplicateur);
 		for (int i = 0; i < this.addrMultiDiff.length; i++) {
 			System.out.println("Addresse Multi diff : " + addrMultiDiff[i]);
@@ -214,10 +218,11 @@ public class Entite implements Runnable {
 
 	public void run() {
 		while (true) {
-			Scanner sc = new Scanner(System.in);
-			String tmp = sc.nextLine();
-			String[] suite = null;
 			try {
+				Scanner sc = new Scanner(System.in);
+				String tmp = sc.nextLine();
+				String tmp2 = new String(tmp);
+				String[] suite = null;
 				if (tmp.contains("APPL")) {
 					suite = tmp.split(" ");
 					if (suite.length < 3) {
@@ -225,43 +230,52 @@ public class Entite implements Runnable {
 					}
 					tmp = suite[0];
 				}
-				tmp = Annexe.removeWhite(tmp);
-				String idm = Annexe.newIdentifiant();
-				String message = tmp + " " + idm;
+				String idm = "";
 
-				if (tmp.equals("GBYE")) {
-					message += " " + Annexe.trouveAdress() + " " + this.portInUDP + " " + this.addrNext + " "
-							+ this.portOutUDP;
-				} else if (tmp.equals("TEST")) {
-					message += " " + this.addrMultiDiff[0] + " " + this.portMultiDiff[0];
-					// TimeTest t = new TimeTest(idm,
-					// System.currentTimeMillis());
-					this.aLL.add(Long.parseLong(idm));
-				} else if (tmp.equals("APPL")) {
-					message += " " + suite[1] + "#### ";
-					String textemssg = "";
-					int size = 0;
-					for (String s : suite) {
-						size += s.length() + 1;
-						textemssg += s + " ";
-					}
-					textemssg.substring(0, textemssg.length() - 1);
-					size--;
-					if (size < 10) {
-						size = Integer.parseInt(Annexe.addZero("" + size, 2));
-					} else if (size < 100) {
-						size = Integer.parseInt(Annexe.addZero("" + size, 1));
-					}
-					message += size + " " + textemssg;
-				}
-				MssgUPD.analyseMssg(message, false);
-				MssgUPD.sendUDP(message, this, idm);
+				idm = sendAnneau(tmp, tmp2, 0, suite);
 				this.mssgTransmisAnnneau1.add(idm);
+				if (this.isDuplicateur == true) {
+					idm = sendAnneau(tmp, tmp2, 1, suite);
+					this.mssgTransmisAnnneau2.add(idm);
+				}
 			} catch (LengthException e) {
-				e.getMessage();
-			} catch (MssgSpellCheck e) {
-				e.getMessage();
+				e.printStackTrace();
 			}
 		}
+	}
+
+	private String sendAnneau(String tmp, String tmpAPPL, int i, String[] suite) {
+		try {
+			tmp = Annexe.removeWhite(tmp);
+			String idm = Annexe.newIdentifiant();
+			String message = tmp + " " + idm;
+
+			if (tmp.equals("GBYE")) {
+				message += " " + Annexe.trouveAdress() + " " + this.portInUDP + " " + this.addrNext[i] + " "
+						+ this.portOutUDP[i];
+			} else if (tmp.equals("TEST")) {
+				message += " " + this.addrMultiDiff[i] + " " + this.portMultiDiff[i];
+				this.aLL.add(Long.parseLong(idm));
+			} else if (tmp.equals("APPL")) {
+				message += " " + suite[1] + "#### ";
+				tmpAPPL = tmpAPPL.substring(10, tmpAPPL.length());
+				int size = tmpAPPL.length();
+				String taille = "" + size;
+				if (size < 10) {
+					taille = Annexe.addZero(taille, 2);
+				} else if (size < 100) {
+					taille = Annexe.addZero(taille, 1);
+				}
+				message += taille + " " + tmpAPPL;
+			}
+			MssgUPD.analyseMssg(message, false);
+			MssgUPD.sendUDP(message, this, idm);
+			return idm;
+		} catch (LengthException e) {
+			e.getMessage();
+		} catch (MssgSpellCheck e) {
+			e.getMessage();
+		}
+		return null;
 	}
 }

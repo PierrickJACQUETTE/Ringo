@@ -133,6 +133,11 @@ public class MssgUPD {
 
 	private static void mssgAPPL(String message, String[] parts, Entite entite) {
 		String idm = parts[1];
+		String messageDIFF = "";
+		for(int i=4;i<parts.length;i++){
+			messageDIFF+= parts[i]+" ";
+		}
+		System.out.println("\nJ'ai recu le mssg APPL est le message est : \n"+messageDIFF+"\n");
 		if (entite.getMssgTransmisAnneau1().contains(idm)) {
 			removeMssg(idm, entite);
 		} else {

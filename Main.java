@@ -32,8 +32,8 @@ public class Main {
 		boolean correctAction = false;
 		Entite entite = new Entite();
 		while (!correctAction) {
-			System.out.println("Voulez un Nouveau anneau ou Joindre un anneau existant ?");
-			System.out.println("Taper N ou J ");
+			System.out.println("Voulez un Nouveau anneau ou Joindre ou Duppliquer un anneau existant ?");
+			System.out.println("Taper N ou J ou D");
 			String reponse = sc.nextLine();
 			if (reponse.equals("N")) {
 				correctAction = true;
@@ -47,16 +47,15 @@ public class Main {
 				entite = VerifEntree.nouveauAnneau(entite, sc);
 			} else if (reponse.equals("J")) {
 				correctAction = true;
-				System.out.println("Voulez un U ou D ?");
+				System.out.println("Voulez un A ou Z ?");
 				reponse = sc.nextLine();
-				if (reponse.equals("U")) {
+				if (reponse.equals("A")) {
 					entite.setAddrNext("127.000.000.001",1);
 					entite.setPortTCPOut(7000);
 					entite.setPortTCPIn(6999);
 					entite.setPortInUDP(7002);
 					entite.setPortOutUDP(7005,1);
 				} else {
-
 					entite.setAddrNext("127.000.000.006",1);
 					entite.setPortTCPOut(6999);
 					entite.setPortTCPIn(6000);

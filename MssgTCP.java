@@ -13,13 +13,9 @@ public class MssgTCP {
 			Socket socket_tcp = new Socket(entite.getAddrNext(1), entite.getPortTCPOut());
 			BufferedReader br = new BufferedReader(new InputStreamReader(socket_tcp.getInputStream()));
 			PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(socket_tcp.getOutputStream()));
-			char[] data = new char[512];
-			int mssg = br.read(data);
-			String message = new String(data, 0, mssg);
+
 			// WELC
-			if (Main.affichage) {
-				System.out.println("Recu de : " + message);
-			}
+			String message = receiveTCP(br, entite, tcp_pw, socket_tcp);
 			analyseMssg(message, tcp_pw);
 			message = Annexe.substringLast(message);
 			String[] parts = message.split(" ");
@@ -27,25 +23,17 @@ public class MssgTCP {
 			entite.setPortOutUDP(Integer.parseInt(parts[2]), 1);
 			entite.setAddrMultiDiff(parts[3], 1);
 			entite.setPortMultiDiff(Integer.parseInt(parts[4]), 1);
+
+			// newc
 			String newc = "NEWC " + Annexe.trouveAdress() + " " + entite.getPortInUDP() + "\n";
-			tcp_pw.print(newc);
-			tcp_pw.flush();
-			if (Main.affichage) {
-				System.out.println("Envoi de : " + newc);
-			}
+			sendTCP(newc, tcp_pw);
+
 			// ackc
-			mssg = br.read(data);
-			message = new String(data, 0, mssg);
-			if (Main.affichage) {
-				System.out.println("Recu de : " + message);
-			}
+			message = receiveTCP(br, entite, tcp_pw, socket_tcp);
 			analyseMssg(message, tcp_pw);
 			message = Annexe.substringLast(message);
-			socket_tcp.close();
-			if (Main.affichage) {
-				System.out.println("Fin de connection TCP");
-				entite.printEntiteSimple();
-			}
+
+			closeTCP(entite, false, br, tcp_pw, socket_tcp);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (LengthException e) {
@@ -66,51 +54,81 @@ public class MssgTCP {
 		if (Main.affichage) {
 			System.out.println("Acceptation TCP");
 		}
+		BufferedReader tcp_br = new BufferedReader(new InputStreamReader(sock_tcp.getInputStream()));
 		PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(sock_tcp.getOutputStream()));
+
+		// WELC
 		String welc = "WELC " + entite.getAddrNext(1) + " " + entite.getPortOutUDP(1) + " " + entite.getAddrMultiDiff(1)
 				+ " " + entite.getPortMultiDiff(1) + "\n";
-		tcp_pw.print(welc);
+		sendTCP(welc, tcp_pw);
+
+		// newc
+		String lu = receiveTCP(tcp_br, entite, tcp_pw, sock_tcp);
+		lu = Annexe.substringLast(lu);
+		String parts[] = lu.split(" ");
+		String futurAddrUDPOut = parts[1];
+		String futurPortUDPOut = parts[2];
+
+		// ackc
+		String ackc = "ACKC\n";
+		sendTCP(ackc, tcp_pw);
+
+		entite.setAddrNext(futurAddrUDPOut, 1);
+		entite.setPortOutUDP(Integer.parseInt(futurPortUDPOut), 1);
+
+		closeTCP(entite, false, tcp_br, tcp_pw, sock_tcp);
+		return entite;
+	}
+
+	private static void closeTCP(Entite entite, boolean erreur, BufferedReader tcp_br, PrintWriter tcp_pw,
+			Socket sock_tcp) {
+		try {
+			tcp_br.close();
+			tcp_pw.close();
+			sock_tcp.close();
+			if (Main.affichage) {
+				System.out.println("Fin de connection TCP");
+				if (erreur) {
+					System.out.println("Erreur lors de l'insertion donc pas d'insertion -- entite inchange\n");
+				} else {
+					entite.printEntiteSimple();
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void sendTCP(String envoi, PrintWriter tcp_pw) {
+		tcp_pw.print(envoi);
 		tcp_pw.flush();
 		if (Main.affichage) {
-			System.out.println("Envoi de : " + welc);
+			System.out.println("Envoi de : " + envoi);
 		}
-		BufferedReader tcp_br = new BufferedReader(new InputStreamReader(sock_tcp.getInputStream()));
-		// newc
-		char[] data = new char[512];
-		int mssg = tcp_br.read(data);
-		boolean erreur = false;
-		if (mssg != -1) {
-			String lu = new String(data, 0, mssg);
-			if (Main.affichage) {
-				System.out.println("Recu  de : " + lu);
-			}
-			lu = Annexe.substringLast(lu);
-			String parts[] = lu.split(" ");
-			String futurAddrUDPOut = parts[1];
-			String futurPortUDPOut = parts[2];
-			String ackc = "ACKC\n";
-			tcp_pw.print(ackc);
-			tcp_pw.flush();
-			if (Main.affichage) {
-				System.out.println("Envoi de : " + ackc);
-			}
-			entite.setAddrNext(futurAddrUDPOut, 1);
-			entite.setPortOutUDP(Integer.parseInt(futurPortUDPOut), 1);
-		} else {
-			erreur = true;
-		}
-		tcp_br.close();
-		tcp_pw.close();
-		sock_tcp.close();
-		if (Main.affichage) {
-			System.out.println("Fin de connection TCP");
-			if (erreur) {
-				System.out.println("Erreur lors de l'insertion donc pas d'insertion -- entite inchange\n");
+	}
+
+	private static String receiveTCP(BufferedReader br, Entite entite, PrintWriter tcp_pw, Socket sc) {
+		try {
+
+			char[] data = new char[512];
+			int mssg;
+			mssg = br.read(data);
+			boolean erreur = false;
+			if (mssg != -1) {
+				String message = new String(data, 0, mssg);
+				if (Main.affichage) {
+					System.out.println("Recu de : " + message);
+				}
+				return message;
 			} else {
-				entite.printEntiteSimple();
+				erreur = true;
+				closeTCP(entite, erreur, br, tcp_pw, sc);
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(0);
 		}
-		return entite;
+		return null;
 	}
 
 	private static void analyseMssg(String mssg, PrintWriter pw) throws LengthException, NotSDLException {
