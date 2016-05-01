@@ -48,85 +48,160 @@ public class MssgUPD {
 		return entite;
 	}
 
-	private static void removeMssg(String idm, Entite entite) {
-		entite.getMssgTransmisAnneau1().remove(idm);
-		if (Main.affichage) {
-			System.out.println("Remove mssg with this idm : " + idm + " from this entity : " + entite.getIdentifiant());
-		}
-		String newIden = Annexe.newIdentifiant();
-		String message = "SUPP " + newIden + " " + idm;
-		sendUDP(message, entite, newIden);
+	private static void removeMssg(String idm, Entite entite, int anneau) {
+		// if (anneau == 1 && entite.getIsDuplicateur()==false) {
+		// entite.getMssgTransmisAnneau1().remove(idm);
+		// if (Main.affichage) {
+		// System.out.println("Remove mssg with this idm : " + idm + " from this
+		// entity : " + entite.getIdentifiant());
+		// }
+		// String newIden = Annexe.newIdentifiant();
+		// String message = "SUPP " + newIden + " " + idm;
+		// sendUDP(message, entite, newIden, 1);
+		// }
 	}
 
 	private static void mssgWHO(String message, String[] parts, Entite entite) {
 		String idm = parts[1];
-		if (entite.getMssgTransmisAnneau1().contains(idm)) {
-			removeMssg(idm, entite);
-		} else {
-			sendUDP(message, entite, idm);
-			entite.getMssgTransmisAnneau1().add(idm);
-		}
 		String idmM = Annexe.newIdentifiant();
-		message = "MEMB " + idmM + " " + entite.getIdentifiant() + " " + Annexe.trouveAdress() + " "
+		String message2 = "MEMB " + idmM + " " + entite.getIdentifiant() + " " + Annexe.trouveAdress() + " "
 				+ entite.getPortInUDP();
-		sendUDP(message, entite, idm);
-		entite.getMssgTransmisAnneau1().add(idmM);
+		if (entite.getMssgTransmisAnneau1().contains(idm)) {
+			removeMssg(idm, entite, 1);
+		} else {
+			sendUDP(message, entite, idm, 1);
+			entite.getMssgTransmisAnneau1().add(idm);
+			sendUDP(message2, entite, idmM, 1);
+			entite.getMssgTransmisAnneau1().add(idmM);
+			membPrint(message2.split(" "));
+		}
+		if (entite.getIsDuplicateur() == true) {
+			if (entite.getMssgTransmisAnneau2().contains(idm)) {
+				removeMssg(idm, entite, 2);
+			} else {
+				sendUDP(message, entite, idm, 2);
+				entite.getMssgTransmisAnneau2().add(idm);
+				sendUDP(message2, entite, idmM, 2);
+				entite.getMssgTransmisAnneau2().add(idmM);
+			}
+		}
+	}
+
+	protected static void membPrint(String[] parts) {
+		System.out.println("\nDans l'anneau est present : ");
+		System.out.println("Une entite avec cette identifiant : " + parts[2]);
+		System.out.println("Qui a comme port : " + parts[4] + " et comme addresse : " + parts[3] + "\n");
 	}
 
 	private static void mssgMEMB(String message, String[] parts, Entite entite) {
 		String idm = parts[1];
 		if (entite.getMssgTransmisAnneau1().contains(idm)) {
-			removeMssg(idm, entite);
+			removeMssg(idm, entite, 1);
 		} else {
-			sendUDP(message, entite, idm);
+			membPrint(parts);
+			sendUDP(message, entite, idm, 1);
 			entite.getMssgTransmisAnneau1().add(idm);
-			System.out.println("\nDans l'anneau est present : ");
-			System.out.println("Une entite avec cette identifiant : " + parts[2]);
-			System.out.println("Qui a comme port : " + parts[4] + " et comme addresse : " + parts[3] + "\n");
 		}
+		if (entite.getIsDuplicateur() == true) {
+			if (entite.getMssgTransmisAnneau2().contains(idm)) {
+				removeMssg(idm, entite, 2);
+			} else {
+				sendUDP(message, entite, idm, 2);
+				entite.getMssgTransmisAnneau2().add(idm);
+			}
+		}
+	}
+
+	private static void mssgGBYE(Entite entite, String[] parts, int anneau) {
+		Entite tmp = new Entite();
+		tmp.setAddrNext(entite.getAddrNext(anneau), anneau);
+		tmp.setPortOutUDP(entite.getPortOutUDP(anneau), anneau);
+		entite.setAddrNext(parts[4], anneau);
+		entite.setPortOutUDP(Integer.parseInt(parts[5]), anneau);
+		String idmNew = Annexe.newIdentifiant();
+		String message = "EYBG" + " " + idmNew;
+		sendUDP(message, tmp, parts[1], anneau);
 	}
 
 	private static void mssgGBYE(String message, String[] parts, Entite entite) {
 		String idm = parts[1];
+		int anneau = 1;
 		if (entite.getMssgTransmisAnneau1().contains(idm)) {
-			removeMssg(idm, entite);
-		} else if (Annexe.trouveAdress().equals(parts[2]) && entite.getPortOutUDP(1) == Integer.parseInt(parts[3])) {
-			Entite tmp = new Entite();
-			tmp.setAddrNext(entite.getAddrNext(1), 1);
-			tmp.setPortOutUDP(entite.getPortOutUDP(1), 1);
-			entite.setAddrNext(parts[4], 1);
-			entite.setPortOutUDP(Integer.parseInt(parts[5]), 1);
-			String idmNew = Annexe.newIdentifiant();
-			message = "EYBG" + " " + idmNew;
-			sendUDP(message, tmp, idm);
+			removeMssg(idm, entite, anneau);
+		} else if (Annexe.trouveAdress().equals(parts[2])
+				&& entite.getPortOutUDP(anneau) == Integer.parseInt(parts[3])) {
+			mssgGBYE(entite, parts, anneau);
 		} else {
-			sendUDP(message, entite, idm);
+			sendUDP(message, entite, idm, anneau);
+		}
+		if (entite.getIsDuplicateur() == true) {
+			anneau = 2;
+			if (entite.getMssgTransmisAnneau2().contains(idm)) {
+				removeMssg(idm, entite, anneau);
+			} else if (Annexe.trouveAdress().equals(parts[2])
+					&& entite.getPortOutUDP(anneau) == Integer.parseInt(parts[3])) {
+				mssgGBYE(entite, parts, anneau);
+			} else {
+				sendUDP(message, entite, idm, anneau);
+			}
 		}
 	}
 
 	private static void mssgEYBG(String message, String[] parts, Entite entite) {
-		System.exit(0);
+		if (entite.getIsDuplicateur() == false) {
+			System.exit(0);
+		}
+		if (entite.getIsDuplicateur() == true) {
+			if (entite.getAlreadyReceivedEYBG() == true) {
+				System.exit(0);
+			} else {
+				entite.setAlreadyReceivedEYBG(false);
+			}
+		}
 	}
 
 	private static void mssgTEST(String message, String[] parts, Entite entite) {
 		String idm = parts[1];
+		boolean one = false;
+		int anneau = 1;
 		if (entite.getMssgTransmisAnneau1().contains(idm)) {
-			removeMssg(idm, entite);
-			entite.getALL().remove(Long.parseLong(idm));
+			removeMssg(idm, entite, anneau);
+			entite.getALL1().remove(Long.parseLong(idm));
 			System.out.println("\nL anneau est en parfait etat\n");
-		} else if (!parts[2].equals(entite.getAddrMultiDiff(1)) && !parts[3].equals(entite.getPortMultiDiff(1))) {
-			System.out.println("J'ai recu un message TEST mais ils n'appartient pas à mon anneau");
+		} else if (!parts[2].equals(entite.getAddrMultiDiff(anneau))
+				&& !parts[3].equals(entite.getPortMultiDiff(anneau))) {
+			System.out.println("J'ai recu un message TEST mais ils n'appartient pas a cet anneau");
 		} else {
-			sendUDP(message, entite, idm);
+			sendUDP(message, entite, idm, anneau);
 			entite.getMssgTransmisAnneau1().add(idm);
+		}
+		if (entite.getIsDuplicateur() == true) {
+			anneau = 2;
+			if (entite.getMssgTransmisAnneau2().contains(idm)) {
+				removeMssg(idm, entite, anneau);
+				entite.getALL2().remove(Long.parseLong(idm));
+				System.out.println("\nL anneau est en parfait etat\n");
+			} else if (!parts[2].equals(entite.getAddrMultiDiff(anneau))
+					&& !parts[3].equals(entite.getPortMultiDiff(anneau))) {
+				System.out.println("J'ai recu un message TEST mais ils n'appartient pas a cet anneau");
+			} else {
+				sendUDP(message, entite, idm, anneau);
+				entite.getMssgTransmisAnneau2().add(idm);
+			}
 		}
 	}
 
 	private static void mssgSUPP(String message, String[] parts, Entite entite) {
 		String idm = parts[2];
 		if (entite.getMssgTransmisAnneau1().contains(idm)) {
-			removeMssg(idm, entite);
-			sendUDP(message, entite, idm);
+			removeMssg(idm, entite, 1);
+			sendUDP(message, entite, idm, 1);
+		}
+		if (entite.getIsDuplicateur() == true) {
+			if (entite.getMssgTransmisAnneau2().contains(idm)) {
+				removeMssg(idm, entite, 2);
+				sendUDP(message, entite, idm, 2);
+			}
 		}
 
 	}
@@ -134,23 +209,33 @@ public class MssgUPD {
 	private static void mssgAPPL(String message, String[] parts, Entite entite) {
 		String idm = parts[1];
 		String messageDIFF = "";
-		for(int i=4;i<parts.length;i++){
-			messageDIFF+= parts[i]+" ";
+		for (int i = 4; i < parts.length; i++) {
+			messageDIFF += parts[i] + " ";
 		}
-		System.out.println("\nJ'ai recu le mssg APPL est le message est : \n"+messageDIFF+"\n");
+		System.out.println("\nJ'ai recu le mssg APPL est le message est : \n" + messageDIFF + "\n");
 		if (entite.getMssgTransmisAnneau1().contains(idm)) {
-			removeMssg(idm, entite);
+			removeMssg(idm, entite, 1);
 		} else {
-			sendUDP(message, entite, idm);
+			sendUDP(message, entite, idm, 1);
+			entite.getMssgTransmisAnneau1().add(idm);
+		}
+		if (entite.getIsDuplicateur() == true) {
+			if (entite.getMssgTransmisAnneau2().contains(idm)) {
+				removeMssg(idm, entite, 2);
+			} else {
+				sendUDP(message, entite, idm, 2);
+				entite.getMssgTransmisAnneau2().add(idm);
+
+			}
 		}
 	}
 
-	protected static void sendUDP(String tmp, Entite entite, String idm) {
+	protected static void sendUDP(String tmp, Entite entite, String idm, int anneau) {
 		try {
 			DatagramSocket dso = new DatagramSocket();
 			byte[] data;
 			data = tmp.getBytes();
-			InetSocketAddress ia = new InetSocketAddress(entite.getAddrNext(1), entite.getPortOutUDP(1));
+			InetSocketAddress ia = new InetSocketAddress(entite.getAddrNext(anneau), entite.getPortOutUDP(anneau));
 			DatagramPacket paquet = new DatagramPacket(data, data.length, ia);
 			dso.send(paquet);
 			if (Main.affichage) {

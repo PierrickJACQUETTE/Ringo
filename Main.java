@@ -41,36 +41,55 @@ public class Main {
 				entite.setPortMultiDiff(7003, 1);
 				entite.setAddrMultiDiff("239.255.000.003", 1);
 				entite.setPortInUDP(7001);
-				entite.setPortOutUDP(7001,1);
+				entite.setPortOutUDP(7001, 1);
 				entite.setPortTCPIn(7000);
 
 				entite = VerifEntree.nouveauAnneau(entite, sc);
-			} else if (reponse.equals("J")) {
+			} else if (reponse.equals("J") || reponse.equals("D")) {
 				correctAction = true;
-				System.out.println("Voulez un A ou Z ?");
+				boolean joindre = false;
+				if (reponse.equals("J")) {
+					joindre = true;
+				}
+				System.out.println("Voulez un A ou Z ou E?");
 				reponse = sc.nextLine();
 				if (reponse.equals("A")) {
-					entite.setAddrNext("127.000.000.001",1);
+					entite.setAddrNext("127.000.000.001", 1);
 					entite.setPortTCPOut(7000);
 					entite.setPortTCPIn(6999);
 					entite.setPortInUDP(7002);
-					entite.setPortOutUDP(7005,1);
-				} else {
-					entite.setAddrNext("127.000.000.006",1);
-					entite.setPortTCPOut(6999);
-					entite.setPortTCPIn(6000);
+					entite.setPortOutUDP(7005, 1);
+					if (joindre == false) {
+						entite.setPortMultiDiff(7007, 1);
+						entite.setAddrMultiDiff("239.255.000.005", 1);
+					}
+				} else if (reponse.equals("Z")) {
+					entite.setAddrNext("127.000.000.006", 1);
+					entite.setPortTCPOut(7000);
+					entite.setPortTCPIn(7008);
 					entite.setPortInUDP(6001);
-					entite.setPortOutUDP(6002,1);
+					entite.setPortOutUDP(6002, 1);
+					if (joindre == false) {
+						entite.setPortMultiDiff(7007, 1);
+						entite.setAddrMultiDiff("239.255.000.005", 1);
+					}
 
+				} else {
+					entite.setAddrNext("127.000.000.006", 1);
+					entite.setPortTCPOut(6999);
+					entite.setPortTCPIn(7009);
+					entite.setPortInUDP(6005);
+					entite.setPortOutUDP(6009, 1);
 				}
-				entite = VerifEntree.rejoindreAnneau(entite, sc);
-				entite = MssgTCP.insertNouveauTCP(entite);
+				entite = VerifEntree.rejoindreAnneau(entite, sc, joindre);
+				entite = MssgTCP.insertNouveauTCP(entite, joindre);
 			} else {
 				System.out.println("Erreur de frappe, recommencez");
 			}
 		}
 		try {
 			Selector selector = Selector.open();
+
 			// --------------- TCP NON BLOQUANT ------------
 			ServerSocketChannel tcp_in_ssc = ServerSocketChannel.open();
 			tcp_in_ssc.configureBlocking(false);
@@ -108,19 +127,35 @@ public class Main {
 			Thread verifMultiDiff = new Thread(mssg);
 			verifMultiDiff.start();
 
+			boolean first = true;
+			DatagramChannel udp_multi_dc2 = null;
 			while (true) {
 				if (affichage) {
 					System.out.println("Waiting for messages : WHOS, GBYE, TEST, APPL DIFF mess");
 				}
+				if (first == true && entite.getIsDuplicateur() == true) {
+					NetworkInterface interf2 = NetworkInterface.getByName("eth0"); // wlan0
+					InetAddress group2 = (Inet4Address) InetAddress.getByName(entite.getAddrMultiDiff(2));
+					udp_multi_dc2 = DatagramChannel.open(StandardProtocolFamily.INET)
+							.setOption(StandardSocketOptions.SO_REUSEADDR, true)
+							.bind(new InetSocketAddress(entite.getPortMultiDiff(2)))
+							.setOption(StandardSocketOptions.IP_MULTICAST_IF, interf2);
+					udp_multi_dc2.configureBlocking(false);
+					udp_multi_dc2.register(selector, SelectionKey.OP_READ);
+					MembershipKey key2 = udp_multi_dc2.join(group2, interf2);
+					first = false;
+				}
+
 				selector.select();
 				Iterator<SelectionKey> it = selector.selectedKeys().iterator();
 				while (it.hasNext()) {
 					SelectionKey sk = it.next();
 					it.remove();
 					if (sk.isReadable() && sk.channel() == udp_multi_dc) {
-						MssgMultDiff.receiveMultiDiff(buff, udp_multi_dc);
-					}
-					if (sk.isReadable() && sk.channel() == udp_in_dc) {
+						MssgMultDiff.receiveMultiDiff(entite, buff, udp_multi_dc);
+					} else if (sk.isReadable() && sk.channel() == udp_multi_dc2) {
+						MssgMultDiff.receiveMultiDiff(entite, buff, udp_multi_dc2);
+					} else if (sk.isReadable() && sk.channel() == udp_in_dc) {
 						entite = MssgUPD.receveUDP(entite, udp_in_dc, buff);
 					} else if (sk.isAcceptable() && sk.channel() == tcp_in_ssc) {
 						entite = MssgTCP.insertAnneauTCP(entite, tcp_in_ssc);

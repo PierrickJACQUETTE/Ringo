@@ -51,7 +51,7 @@ public class Annexe {
 	}
 
 	protected static String newIdentifiant() {
-		return new String("" + System.currentTimeMillis());
+		return new String("" + System.nanoTime());
 	}
 
 	protected static String removeWhite(String tmp) {
@@ -180,7 +180,7 @@ public class Annexe {
 		// correct = Annexe.verifNombre(reponse, true);
 		// }
 		// entite.setPortInUDP(Annexe.entier(reponse));
-		// entite.setPortOutUDP(Annexe.entier(reponse),1);
+		// entite.setPortOutUDP(Annexe.entier(reponse), 1);
 		// correct = false;
 		// while (!correct) {
 		// System.out.println("Veuillez entrer son numero du port TCP : ");

@@ -12,9 +12,11 @@ public class Entite implements Runnable {
 	private String[] addrMultiDiff;
 	private int[] portMultiDiff;
 	private boolean isDuplicateur;
+	private boolean alreadyReceivedEYBG;
 	private ArrayList<String> mssgTransmisAnnneau1;
 	private ArrayList<String> mssgTransmisAnnneau2;
-	private ArrayList<Long> aLL;
+	private ArrayList<Long> aLL1;
+	private ArrayList<Long> aLL2;
 
 	public Entite() {
 		this.identifiant = "-1";
@@ -30,9 +32,11 @@ public class Entite implements Runnable {
 		this.portMultiDiff[0] = -1;
 		this.portMultiDiff[1] = -1;
 		this.isDuplicateur = false;
+		this.alreadyReceivedEYBG = false;
 		this.mssgTransmisAnnneau1 = new ArrayList<String>();
 		this.mssgTransmisAnnneau2 = new ArrayList<String>();
-		this.aLL = new ArrayList<Long>();
+		this.aLL1 = new ArrayList<Long>();
+		this.aLL2 = new ArrayList<Long>();
 	}
 
 	public void printEntiteSimple() {
@@ -69,7 +73,7 @@ public class Entite implements Runnable {
 	}
 
 	public String getIdentifiant() {
-		return identifiant;
+		return this.identifiant;
 	}
 
 	public void setIdentifiant(String identifiant) {
@@ -77,7 +81,7 @@ public class Entite implements Runnable {
 	}
 
 	public int getPortInUDP() {
-		return portInUDP;
+		return this.portInUDP;
 	}
 
 	public void setPortInUDP(int portInUDP) {
@@ -107,7 +111,7 @@ public class Entite implements Runnable {
 	}
 
 	public int getPortTCPIn() {
-		return portTCPIn;
+		return this.portTCPIn;
 	}
 
 	public void setPortTCPIn(int portTCP) {
@@ -115,7 +119,7 @@ public class Entite implements Runnable {
 	}
 
 	public int getPortTCPOut() {
-		return portTCPOut;
+		return this.portTCPOut;
 	}
 
 	public void setPortTCPOut(int portTCP) {
@@ -188,12 +192,20 @@ public class Entite implements Runnable {
 		}
 	}
 
-	public boolean isDuplicateur() {
-		return isDuplicateur;
+	public boolean getIsDuplicateur() {
+		return this.isDuplicateur;
 	}
 
-	public void setDuplicateur(boolean isDuplicateur) {
+	public void setIsDuplicateur(boolean isDuplicateur) {
 		this.isDuplicateur = isDuplicateur;
+	}
+
+	public boolean getAlreadyReceivedEYBG() {
+		return this.alreadyReceivedEYBG;
+	}
+
+	public void setAlreadyReceivedEYBG(boolean alreadyReceivedEYBG) {
+		this.alreadyReceivedEYBG = alreadyReceivedEYBG;
 	}
 
 	public ArrayList<String> getMssgTransmisAnneau1() {
@@ -212,8 +224,12 @@ public class Entite implements Runnable {
 		this.mssgTransmisAnnneau2 = mssgTransmis;
 	}
 
-	public ArrayList<Long> getALL() {
-		return this.aLL;
+	public ArrayList<Long> getALL1() {
+		return this.aLL1;
+	}
+
+	public ArrayList<Long> getALL2() {
+		return this.aLL2;
 	}
 
 	public void run() {
@@ -223,39 +239,48 @@ public class Entite implements Runnable {
 				String tmp = sc.nextLine();
 				String tmp2 = new String(tmp);
 				String[] suite = null;
-				if (tmp.contains("APPL")) {
+				if (tmp.equals("WHOS")) {
+					envoi("MEMB", "", suite, true);
+				} else if (tmp.contains("APPL")) {
 					suite = tmp.split(" ");
 					if (suite.length < 3) {
 						MssgUPD.suiteAnalyseMssg(3, tmp, suite);
 					}
 					tmp = suite[0];
 				}
-				String idm = "";
-
-				idm = sendAnneau(tmp, tmp2, 0, suite);
-				this.mssgTransmisAnnneau1.add(idm);
-				if (this.isDuplicateur == true) {
-					idm = sendAnneau(tmp, tmp2, 1, suite);
-					this.mssgTransmisAnnneau2.add(idm);
-				}
+				envoi(tmp, tmp2, suite, false);
 			} catch (LengthException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private String sendAnneau(String tmp, String tmpAPPL, int i, String[] suite) {
+	private void envoi(String tmp, String tmp2, String[] suite, boolean isPossible) {
+		String idm = sendAnneau(tmp, tmp2, 1, suite, isPossible);
+		this.mssgTransmisAnnneau1.add(idm);
+		if (this.isDuplicateur == true) {
+			idm = sendAnneau(tmp, tmp2, 2, suite, isPossible);
+			this.mssgTransmisAnnneau2.add(idm);
+		}
+	}
+
+	private String sendAnneau(String tmp, String tmpAPPL, int i, String[] suite, boolean isPossible) {
 		try {
 			tmp = Annexe.removeWhite(tmp);
 			String idm = Annexe.newIdentifiant();
 			String message = tmp + " " + idm;
-
-			if (tmp.equals("GBYE")) {
-				message += " " + Annexe.trouveAdress() + " " + this.portInUDP + " " + this.addrNext[i] + " "
+			if (tmp.equals("MEMB")) {
+				message = "MEMB " + idm + " " + this.identifiant + " " + Annexe.trouveAdress() + " " + this.portInUDP;
+			} else if (tmp.equals("GBYE")) {
+				message += " " + Annexe.trouveAdress() + " " + this.portInUDP + " " + this.addrNext[i - 1] + " "
 						+ this.portOutUDP[i];
 			} else if (tmp.equals("TEST")) {
-				message += " " + this.addrMultiDiff[i] + " " + this.portMultiDiff[i];
-				this.aLL.add(Long.parseLong(idm));
+				message += " " + this.addrMultiDiff[i - 1] + " " + this.portMultiDiff[i - 1];
+				if (i == 1) {
+					this.aLL1.add(Long.parseLong(idm));
+				} else if (i == 2) {
+					this.aLL2.add(Long.parseLong(idm));
+				}
 			} else if (tmp.equals("APPL")) {
 				message += " " + suite[1] + "#### ";
 				tmpAPPL = tmpAPPL.substring(10, tmpAPPL.length());
@@ -268,8 +293,13 @@ public class Entite implements Runnable {
 				}
 				message += taille + " " + tmpAPPL;
 			}
-			MssgUPD.analyseMssg(message, false);
-			MssgUPD.sendUDP(message, this, idm);
+			if (isPossible == true) {
+				MssgUPD.membPrint(message.split(" "));
+				MssgUPD.analyseMssg(message, true);
+			} else {
+				MssgUPD.analyseMssg(message, false);
+			}
+			MssgUPD.sendUDP(message, this, idm, i);
 			return idm;
 		} catch (LengthException e) {
 			e.getMessage();
