@@ -4,6 +4,8 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.nio.channels.MembershipKey;
+import java.util.ArrayList;
 
 //pour compiler option -Djava.net.preferIPv4Stack=true FAIRE UN MAKE
 
@@ -49,7 +51,8 @@ public class MssgMultDiff extends Thread {
 		}
 	}
 
-	protected static void receiveMultiDiff(Entite entite, ByteBuffer buff, DatagramChannel udp_multi_dc) {
+	protected static void receiveMultiDiff(Entite entite, ByteBuffer buff, DatagramChannel udp_multi_dc,
+			MembershipKey key) {
 		try {
 			if (Main.affichage) {
 				System.out.println("Message UDP multi diff recu");
@@ -59,26 +62,62 @@ public class MssgMultDiff extends Thread {
 			if (Main.affichage) {
 				System.out.println("Message recu : " + st);
 			}
-			buff.clear();
 			String[] part = st.split(" ");
 			if (part[0].equals("DOWN")) {
 				if (entite.getIsDuplicateur() == false) {
 					System.exit(0);
 				} else {
-					System.out.println("Ne pas quitter comme ca !!!!!!");
-					// boolean an argument pour savoir anneau 1 ou deux , si
-					// cest deux , modifier le boolean isDuplicateur a false
-					// si cest le 1 mettre les attributs de 2 dans 1 et boolean
-					// false
+					int portEnvoi = Integer.parseInt(udp_multi_dc.getLocalAddress().toString().split(":")[1]);
+					String addrEnvoi = Annexe.convertIPV4Complete(key.group().getHostAddress());
+					if (entite.getAddrMultiDiff(1).equals(addrEnvoi) && entite.getPortMultiDiff(1) == portEnvoi) {
 
-					// apres faiut faire le mssg NOTC
+						entite.setIsDuplicateur(false);
+						entite = modifEntite(entite, 1);
+						entite = modifEntite(entite, 2);
+
+					} else if (entite.getAddrMultiDiff(2).equals(addrEnvoi)
+							&& entite.getPortMultiDiff(2) == portEnvoi) {
+
+						entite.setIsDuplicateur(false);
+						entite = modifEntite(entite, 2);
+
+					} else {
+						System.out.println("L'addresse et/ou le port de multidiff est inconnu a cette entite");
+					}
 				}
 			} else {
-				System.out.println("Message recu en multidiff en inconnu");
+				try {
+					throw new MssgSpellCheck(st, "MultiDiff");
+				} catch (MssgSpellCheck e) {
+					e.getMessage();
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private static Entite modifEntite(Entite entite, int anneau) {
+		String addrNext, addrMulti;
+		int portOutUDp, portMulti;
+		if (anneau == 1) {
+			addrNext = entite.getAddrNext(2);
+			addrMulti = entite.getAddrMultiDiff(2);
+			portOutUDp = entite.getPortOutUDP(2);
+			portMulti = entite.getPortMultiDiff(2);
+			entite.setALL1(entite.getALL2());
+			entite.setMssgTransmisAnneau1(entite.getMssgTransmisAnneau2());
+
+		} else {
+			addrMulti = addrNext = null;
+			portMulti = portOutUDp = -1;
+			entite.setALL2(new ArrayList<Long>());
+		}
+		entite.setAddrNext(addrNext, anneau);
+		entite.setPortOutUDP(portOutUDp, anneau);
+		entite.setAddrMultiDiff(addrMulti, anneau);
+		entite.setPortMultiDiff(portMulti, anneau);
+		return entite;
 	}
 
 	@Override

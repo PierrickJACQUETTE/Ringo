@@ -14,36 +14,46 @@ public class MssgTCP {
 			BufferedReader br = new BufferedReader(new InputStreamReader(socket_tcp.getInputStream()));
 			PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(socket_tcp.getOutputStream()));
 
-			// WELC
+			// WELC ou NOTC
 			String message = receiveTCP(br, entite, tcp_pw, socket_tcp);
 			analyseMssg(message, tcp_pw);
 			message = Annexe.substringLast(message);
+
 			String[] parts = message.split(" ");
-			if (joindre == true) {
-				entite.setAddrNext(parts[1], 1);
-				entite.setPortOutUDP(Integer.parseInt(parts[2]), 1);
-				entite.setAddrMultiDiff(parts[3], 1);
-				entite.setPortMultiDiff(Integer.parseInt(parts[4]), 1);
-			}
-			String send = "";
-			if (joindre == true) {
-				send = "NEWC " + Annexe.trouveAdress() + " " + entite.getPortInUDP() + "\n";
+			if (parts[0].equals("WELC")) {
+				if (joindre == true) {
+					entite.setAddrNext(parts[1], 1);
+					entite.setPortOutUDP(Integer.parseInt(parts[2]), 1);
+					entite.setAddrMultiDiff(parts[3], 1);
+					entite.setPortMultiDiff(Integer.parseInt(parts[4]), 1);
+				}
+
+				String send = "";
+				if (joindre == true) {
+					send = "NEWC " + Annexe.trouveAdress() + " " + entite.getPortInUDP() + "\n";
+				} else {
+					send = "DUPL " + Annexe.trouveAdress() + " " + entite.getPortInUDP() + " "
+							+ entite.getAddrMultiDiff(1) + " " + entite.getPortMultiDiff(1) + "\n";
+				}
+				sendTCP(send, tcp_pw);
+
+				// ACKC ou ACKD
+				message = receiveTCP(br, entite, tcp_pw, socket_tcp);
+				analyseMssg(message, tcp_pw);
+				message = Annexe.substringLast(message);
+				if (joindre == false) {
+					parts = message.split(" ");
+					entite.setPortOutUDP(Integer.parseInt(parts[1]), 1);
+				}
+				closeTCP(entite, br, tcp_pw, socket_tcp);
+				print(false, entite);
 			} else {
-				send = "DUPL " + Annexe.trouveAdress() + " " + entite.getPortInUDP() + " " + entite.getAddrMultiDiff(1)
-						+ " " + entite.getPortMultiDiff(1) + "\n";
-			}
-			sendTCP(send, tcp_pw);
-
-			// ackc ou ackd
-			message = receiveTCP(br, entite, tcp_pw, socket_tcp);
-			analyseMssg(message, tcp_pw);
-			message = Annexe.substringLast(message);
-			if (joindre == false) {
-				parts = message.split(" ");
-				entite.setPortOutUDP(Integer.parseInt(parts[1]), 1);
+				System.out.println("Entite ou se connecter est deja un doubleur");
+				closeTCP(entite, br, tcp_pw, socket_tcp);
+				print(true, entite);
+				System.exit(0);
 			}
 
-			closeTCP(entite, false, br, tcp_pw, socket_tcp);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (LengthException e) {
@@ -67,59 +77,76 @@ public class MssgTCP {
 		BufferedReader tcp_br = new BufferedReader(new InputStreamReader(sock_tcp.getInputStream()));
 		PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(sock_tcp.getOutputStream()));
 
-		// WELC
-		String welc = "WELC " + entite.getAddrNext(1) + " " + entite.getPortOutUDP(1) + " " + entite.getAddrMultiDiff(1)
-				+ " " + entite.getPortMultiDiff(1) + "\n";
-		sendTCP(welc, tcp_pw);
+		String mssg = "";
+		if (entite.getIsDuplicateur() == false) {
+			// WELC
+			mssg = "WELC " + entite.getAddrNext(1) + " " + entite.getPortOutUDP(1) + " " + entite.getAddrMultiDiff(1)
+					+ " " + entite.getPortMultiDiff(1) + "\n";
+		} else {
+			// NOTC
+			mssg = "NOTC\n";
+		}
+		sendTCP(mssg, tcp_pw);
 
-		// newc ou dupl
-		String lu = receiveTCP(tcp_br, entite, tcp_pw, sock_tcp);
-		lu = Annexe.substringLast(lu);
-		String parts[] = lu.split(" ");
-		String futurAddrUDPOut = parts[1];
-		String futurPortUDPOut = parts[2];
-		int anneau = 1;
-		String futurMultiDiffAddr = "";
-		String futurMultiDiffPort = "";
-		String envoi = "";
-		boolean demandeDupplication = false;
-		if (parts[0].equals("NEWC")) {
-			envoi = "ACKC\n";
-		} else if (parts[0].equals("DUPL")) {
-			anneau = 2;
-			futurMultiDiffAddr = parts[3];
-			futurMultiDiffPort = parts[4];
-			envoi = "ACKD " + entite.getPortInUDP() + "\n";
-			demandeDupplication = true;
+		if (entite.getIsDuplicateur() == false) {
+			// NEWC ou DUPL
+			String lu = receiveTCP(tcp_br, entite, tcp_pw, sock_tcp);
+			lu = Annexe.substringLast(lu);
+			String parts[] = lu.split(" ");
+			String futurAddrUDPOut = parts[1];
+			String futurPortUDPOut = parts[2];
+			int anneau = 1;
+			String futurMultiDiffAddr = "";
+			String futurMultiDiffPort = "";
+			String envoi = "";
+			boolean demandeDupplication = false;
+			if (parts[0].equals("NEWC")) {
+				envoi = "ACKC\n";
+			} else if (parts[0].equals("DUPL")) {
+				anneau = 2;
+				futurMultiDiffAddr = parts[3];
+				futurMultiDiffPort = parts[4];
+				envoi = "ACKD " + entite.getPortInUDP() + "\n";
+				demandeDupplication = true;
+			}
+
+			sendTCP(envoi, tcp_pw);
+
+			entite.setAddrNext(futurAddrUDPOut, anneau);
+			entite.setPortOutUDP(Integer.parseInt(futurPortUDPOut), anneau);
+			if (parts[0].equals("DUPL")) {
+				entite.setAddrMultiDiff(futurMultiDiffAddr, 2);
+				entite.setPortMultiDiff(Integer.parseInt(futurMultiDiffPort), 2);
+			}
+
+			closeTCP(entite, tcp_br, tcp_pw, sock_tcp);
+			entite.setIsDuplicateur(demandeDupplication);
+			print(false, entite);
+		} else {
+			closeTCP(entite, tcp_br, tcp_pw, sock_tcp);
+			print(true, entite);
 		}
 
-		sendTCP(envoi, tcp_pw);
-
-		entite.setAddrNext(futurAddrUDPOut, anneau);
-		entite.setPortOutUDP(Integer.parseInt(futurPortUDPOut), anneau);
-		if (parts[0].equals("DUPL")) {
-			entite.setAddrMultiDiff(futurMultiDiffAddr, 2);
-			entite.setPortMultiDiff(Integer.parseInt(futurMultiDiffPort), 2);
-		}
-
-		closeTCP(entite, false, tcp_br, tcp_pw, sock_tcp);
-		entite.setIsDuplicateur(demandeDupplication);
 		return entite;
 	}
 
-	private static void closeTCP(Entite entite, boolean erreur, BufferedReader tcp_br, PrintWriter tcp_pw,
-			Socket sock_tcp) {
+	private static void print(boolean erreur, Entite entite) {
+		if (Main.affichage) {
+			if (erreur) {
+				System.out.println("Erreur lors de l'insertion donc pas d'insertion -- entite inchange\n");
+			} else {
+				entite.printEntiteSimple();
+			}
+		}
+	}
+
+	private static void closeTCP(Entite entite, BufferedReader tcp_br, PrintWriter tcp_pw, Socket sock_tcp) {
 		try {
 			tcp_br.close();
 			tcp_pw.close();
 			sock_tcp.close();
 			if (Main.affichage) {
 				System.out.println("Fin de connection TCP");
-				if (erreur) {
-					System.out.println("Erreur lors de l'insertion donc pas d'insertion -- entite inchange\n");
-				} else {
-					entite.printEntiteSimple();
-				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -149,7 +176,8 @@ public class MssgTCP {
 				return message;
 			} else {
 				erreur = true;
-				closeTCP(entite, erreur, br, tcp_pw, sc);
+				closeTCP(entite, br, tcp_pw, sc);
+				print(erreur, entite);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -163,7 +191,7 @@ public class MssgTCP {
 		if (parts[0].equals("WELC") || parts[0].equals("DUPL")) {
 			int longeur = 5;
 			suiteAnalyseMssg(longeur, mssg, parts);
-		} else if (parts[0].equals("ACKC")) {
+		} else if (parts[0].equals("ACKC") || parts[0].equals("NOTC")) {
 			int longeur = 1;
 			suiteAnalyseMssg(longeur, mssg, parts);
 		} else if (parts[0].equals("ACKD")) {

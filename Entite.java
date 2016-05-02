@@ -45,18 +45,25 @@ public class Entite implements Runnable {
 		System.out.println("Port TCPIn : " + this.portTCPIn);
 		System.out.println("Port TCPOut : " + this.portTCPOut);
 		for (int i = 0; i < this.addrNext.length; i++) {
-			System.out.println("Addresse next : " + addrNext[i]);
-			System.out.println("Port Out UPD : " + portOutUDP[i]);
+			System.out.println("Addresse next : " + this.addrNext[i]);
+			System.out.println("Port Out UPD : " + this.portOutUDP[i]);
 		}
 		System.out.println("L'entite est un duplicateur ? " + this.isDuplicateur);
 		for (int i = 0; i < this.addrMultiDiff.length; i++) {
-			System.out.println("Addresse Multi diff : " + addrMultiDiff[i]);
-			System.out.println("Port Multi diff : " + portMultiDiff[i]);
+			System.out.println("Addresse Multi diff : " + this.addrMultiDiff[i]);
+			System.out.println("Port Multi diff : " + this.portMultiDiff[i]);
 		}
+		System.out.println("Si cest un dupp et deja recu EYBE ? " + this.alreadyReceivedEYBG);
 		System.out.println();
 	}
 
 	private void printMssgAnneau(ArrayList<String> arl) {
+		for (int i = 0; i < arl.size(); i++) {
+			System.out.println(i + " : " + arl.get(i));
+		}
+	}
+
+	private void printMssgTestAnneau(ArrayList<Long> arl) {
 		for (int i = 0; i < arl.size(); i++) {
 			System.out.println(i + " : " + arl.get(i));
 		}
@@ -69,6 +76,13 @@ public class Entite implements Runnable {
 		printMssgAnneau(this.mssgTransmisAnnneau1);
 		System.out.println("Sur l'anneau 2 : ");
 		printMssgAnneau(this.mssgTransmisAnnneau2);
+		System.out.println();
+
+		System.out.println("Les messages transmis test par  cette entité sont : ");
+		System.out.println("Sur l'anneau 1 : ");
+		printMssgTestAnneau(this.aLL1);
+		System.out.println("Sur l'anneau 2 : ");
+		printMssgTestAnneau(this.aLL2);
 		System.out.println();
 	}
 
@@ -228,8 +242,16 @@ public class Entite implements Runnable {
 		return this.aLL1;
 	}
 
+	public void setALL1(ArrayList<Long> aLL1) {
+		this.aLL1 = aLL1;
+	}
+
 	public ArrayList<Long> getALL2() {
 		return this.aLL2;
+	}
+
+	public void setALL2(ArrayList<Long> aLL2) {
+		this.aLL2 = aLL2;
 	}
 
 	public void run() {
@@ -273,7 +295,7 @@ public class Entite implements Runnable {
 				message = "MEMB " + idm + " " + this.identifiant + " " + Annexe.trouveAdress() + " " + this.portInUDP;
 			} else if (tmp.equals("GBYE")) {
 				message += " " + Annexe.trouveAdress() + " " + this.portInUDP + " " + this.addrNext[i - 1] + " "
-						+ this.portOutUDP[i];
+						+ this.portOutUDP[i - 1];
 			} else if (tmp.equals("TEST")) {
 				message += " " + this.addrMultiDiff[i - 1] + " " + this.portMultiDiff[i - 1];
 				if (i == 1) {

@@ -71,7 +71,7 @@ public class Main {
 					entite.setPortOutUDP(6002, 1);
 					if (joindre == false) {
 						entite.setPortMultiDiff(7007, 1);
-						entite.setAddrMultiDiff("239.255.000.005", 1);
+						entite.setAddrMultiDiff("239.255.000.004", 1);
 					}
 
 				} else {
@@ -129,8 +129,10 @@ public class Main {
 
 			boolean first = true;
 			DatagramChannel udp_multi_dc2 = null;
+			MembershipKey key2 = null;
 			while (true) {
 				if (affichage) {
+					entite.printEntiteSimple();
 					System.out.println("Waiting for messages : WHOS, GBYE, TEST, APPL DIFF mess");
 				}
 				if (first == true && entite.getIsDuplicateur() == true) {
@@ -142,7 +144,7 @@ public class Main {
 							.setOption(StandardSocketOptions.IP_MULTICAST_IF, interf2);
 					udp_multi_dc2.configureBlocking(false);
 					udp_multi_dc2.register(selector, SelectionKey.OP_READ);
-					MembershipKey key2 = udp_multi_dc2.join(group2, interf2);
+					key2 = udp_multi_dc2.join(group2, interf2);
 					first = false;
 				}
 
@@ -152,9 +154,9 @@ public class Main {
 					SelectionKey sk = it.next();
 					it.remove();
 					if (sk.isReadable() && sk.channel() == udp_multi_dc) {
-						MssgMultDiff.receiveMultiDiff(entite, buff, udp_multi_dc);
+						MssgMultDiff.receiveMultiDiff(entite, buff, udp_multi_dc, key);
 					} else if (sk.isReadable() && sk.channel() == udp_multi_dc2) {
-						MssgMultDiff.receiveMultiDiff(entite, buff, udp_multi_dc2);
+						MssgMultDiff.receiveMultiDiff(entite, buff, udp_multi_dc2, key2);
 					} else if (sk.isReadable() && sk.channel() == udp_in_dc) {
 						entite = MssgUPD.receveUDP(entite, udp_in_dc, buff);
 					} else if (sk.isAcceptable() && sk.channel() == tcp_in_ssc) {
@@ -162,6 +164,8 @@ public class Main {
 					} else {
 						System.out.println("Que s'est il passe");
 					}
+					buff = ByteBuffer.allocate(0);
+					buff = ByteBuffer.allocate(512);
 				}
 			}
 		} catch (Exception e) {

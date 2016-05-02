@@ -35,7 +35,7 @@ public class MssgUPD {
 			} else if (parts[0].equals("APPL")) {
 				mssgAPPL(st, parts, entite);
 			}
-			buff.clear();
+
 		} catch (LengthException | MssgSpellCheck e) {
 			if (Main.affichage) {
 				System.out.println("Je ne transfere pas ce message");
@@ -121,6 +121,11 @@ public class MssgUPD {
 		String idmNew = Annexe.newIdentifiant();
 		String message = "EYBG" + " " + idmNew;
 		sendUDP(message, tmp, parts[1], anneau);
+		if (anneau == 1) {
+			entite.getMssgTransmisAnneau1().add(idmNew);
+		} else if (anneau == 2) {
+			entite.getMssgTransmisAnneau2().add(idmNew);
+		}
 	}
 
 	private static void mssgGBYE(String message, String[] parts, Entite entite) {
@@ -133,6 +138,7 @@ public class MssgUPD {
 			mssgGBYE(entite, parts, anneau);
 		} else {
 			sendUDP(message, entite, idm, anneau);
+			entite.getMssgTransmisAnneau1().add(idm);
 		}
 		if (entite.getIsDuplicateur() == true) {
 			anneau = 2;
@@ -143,6 +149,7 @@ public class MssgUPD {
 				mssgGBYE(entite, parts, anneau);
 			} else {
 				sendUDP(message, entite, idm, anneau);
+				entite.getMssgTransmisAnneau2().add(idm);
 			}
 		}
 	}
@@ -155,7 +162,7 @@ public class MssgUPD {
 			if (entite.getAlreadyReceivedEYBG() == true) {
 				System.exit(0);
 			} else {
-				entite.setAlreadyReceivedEYBG(false);
+				entite.setAlreadyReceivedEYBG(true);
 			}
 		}
 	}
@@ -210,7 +217,10 @@ public class MssgUPD {
 		String idm = parts[1];
 		String messageDIFF = "";
 		for (int i = 4; i < parts.length; i++) {
-			messageDIFF += parts[i] + " ";
+			messageDIFF += parts[i];
+			if (i != parts.length) {
+				messageDIFF += " ";
+			}
 		}
 		System.out.println("\nJ'ai recu le mssg APPL est le message est : \n" + messageDIFF + "\n");
 		if (entite.getMssgTransmisAnneau1().contains(idm)) {
@@ -252,33 +262,20 @@ public class MssgUPD {
 	protected static void analyseMssg(String str, boolean isPrivate) throws LengthException, MssgSpellCheck {
 		String parts[] = str.split(" ");
 		if (parts[0].equals("WHOS") || (parts[0].equals("EYBG") && isPrivate == true)) {
-			int longeur = 2;
-			if (parts.length == longeur) {
-				suiteAnalyseMssg(longeur, str, parts);
-			}
+			suiteAnalyseMssg(2, str, parts);
 		} else if (parts[0].equals("MEMB") && isPrivate == true) {
-			int longeur = 5;
-			if (parts.length == longeur) {
-				suiteAnalyseMssg(longeur, str, parts);
-			}
+			suiteAnalyseMssg(5, str, parts);
 		} else if (parts[0].equals("GBYE")) {
-			int longeur = 6;
-			if (parts.length == longeur) {
-				suiteAnalyseMssg(longeur, str, parts);
-			}
+			suiteAnalyseMssg(6, str, parts);
 		} else if (parts[0].equals("TEST")) {
-			int longeur = 4;
-			if (parts.length == longeur) {
-				suiteAnalyseMssg(longeur, str, parts);
-			}
-
+			suiteAnalyseMssg(4, str, parts);
 		} else if (parts[0].equals("APPL")) {
-			int longeur = 5;
-			if (parts.length == longeur) {
+			int longeur = 3;
+			if (parts.length < longeur) {
 				suiteAnalyseMssg(longeur, str, parts);
 			}
 			if (!parts[2].equals("DIFF####")) {
-				throw new MssgSpellCheck(parts[2]);
+				throw new MssgSpellCheck(parts[2], "UDP");
 			}
 			longeur = 512 - 4 - 1 - 8 - 1 - 8 - 1 - 3 - 1;
 			if (parts[4].length() > longeur) {
@@ -290,7 +287,7 @@ public class MssgUPD {
 				suiteAnalyseMssg(longeur, str, parts);
 			}
 		} else {
-			throw new MssgSpellCheck(parts[0]);
+			throw new MssgSpellCheck(parts[0], "UDP");
 		}
 	}
 
