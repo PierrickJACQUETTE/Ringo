@@ -202,7 +202,7 @@ public class MssgTCP {
 
 	private static void analyseMssg(String mssg) throws LengthException, NotSDLException, MssgSpellCheck {
 		String parts[] = mssg.split(" ");
-		if (mssg.length() > Main.SIZEMESSG) {
+		if (mssg.getBytes().length > Main.SIZEMESSG) {
 			throw new LengthException(mssg.length(), mssg, "TCP");
 		}
 		if (parts[0].equals("WELC") || parts[0].equals("DUPL")) {

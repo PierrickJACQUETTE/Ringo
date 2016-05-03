@@ -67,7 +67,7 @@ public class MssgMultDiff extends Thread {
 			if (Main.affichage) {
 				System.out.println("Message recu : " + st);
 			}
-			if (st.length() > Main.SIZEMESSG) {
+			if (st.getBytes().length > Main.SIZEMESSG) {
 				throw new LengthException(st.length(), st, "MULTI DIFF recu");
 			}
 			String[] part = st.split(" ");

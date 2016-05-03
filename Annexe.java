@@ -5,8 +5,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
@@ -46,6 +52,18 @@ public class Annexe {
 			return false;
 		}
 		return true;
+	}
+
+	protected static boolean listerRepertoire(String name) {
+		File repertoire = new File(".");
+		String[] listefichiers;
+		listefichiers = repertoire.list();
+		for (int i = 0; i < listefichiers.length; i++) {
+			if (listefichiers[i].equals(name)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected static String addZero(String str, int nbrZero) {
@@ -163,6 +181,11 @@ public class Annexe {
 		return (parts.length == 4) ? true : false;
 	}
 
+	protected static void waitAMssg() {
+		System.out.println(
+				"Waiting for messages : WHOS, GBYE, TEST, INFO [SIMPLE|COMPLEX], APPL [DIFF mess| TRANS nom_fichier");
+	}
+
 	protected static boolean verifAddress(String str, boolean isIPV4) {
 		try {
 			if (isIPV4) {
@@ -184,6 +207,35 @@ public class Annexe {
 
 	protected static int entier(String str) {
 		return Integer.parseInt(str);
+	}
+
+	protected static String littleEndian(int i) {
+		ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+		byteBuffer.putInt(i);
+		byte[] result = byteBuffer.array();
+		String s = Arrays.toString(result);
+		s = s.replaceAll(", ", "");
+		s = s.substring(1, s.length() - 1);
+		return s;
+	}
+
+	protected static int nbrMssgApplTrans(String name) {
+		File fileIn = new File(name);
+		FileInputStream fis;
+		int res = 0;
+		try {
+			fis = new FileInputStream(fileIn);
+			int sizeFicher = fis.available();
+			// APPL_8_TRANS###_SEN_8_8_3_ => 4+9+9+4+9+9+5 => 49
+			int maxMssg = Main.SIZEMESSG - 49;
+			res = (sizeFicher / maxMssg) + 1;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return res;
 	}
 
 	private static String identifiantEntite(Entite entite) {

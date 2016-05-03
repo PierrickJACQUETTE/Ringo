@@ -17,6 +17,7 @@ public class Entite implements Runnable {
 	private ArrayList<String> mssgTransmisAnnneau2;
 	private ArrayList<Long> aLL1;
 	private ArrayList<Long> aLL2;
+	private ArrayList<String> demandeFichier;
 
 	public Entite() {
 		this.identifiant = "-1";
@@ -37,6 +38,7 @@ public class Entite implements Runnable {
 		this.mssgTransmisAnnneau2 = new ArrayList<String>();
 		this.aLL1 = new ArrayList<Long>();
 		this.aLL2 = new ArrayList<Long>();
+		this.demandeFichier = new ArrayList<String>();
 	}
 
 	public void printEntiteSimple() {
@@ -254,6 +256,14 @@ public class Entite implements Runnable {
 		this.aLL2 = aLL2;
 	}
 
+	public ArrayList<String> getDemandeFichier() {
+		return this.demandeFichier;
+	}
+
+	public void setDemandeFichier(ArrayList<String> list) {
+		this.demandeFichier = list;
+	}
+
 	public void run() {
 		while (true) {
 			try {
@@ -272,14 +282,13 @@ public class Entite implements Runnable {
 					envoi("MEMB", "", suite, true);
 				} else if (tmp.contains("APPL")) {
 					suite = tmp.split(" ");
-					if (suite.length < 3) {
-						MssgUPD.suiteAnalyseMssg(3, tmp, suite);
-					}
+					MssgUPD.suiteAnalyseMssgInf(3, tmp, suite);
 					tmp = suite[0];
 				}
 				if (info == false) {
 					envoi(tmp, tmp2, suite, false);
 				}
+				Annexe.waitAMssg();
 			} catch (LengthException e) {
 				e.printStackTrace();
 			}
@@ -314,16 +323,32 @@ public class Entite implements Runnable {
 					this.aLL2.add(Long.parseLong(idm));
 				}
 			} else if (tmp.equals("APPL")) {
-				message += " " + suite[1] + "#### ";
-				tmpAPPL = tmpAPPL.substring(10, tmpAPPL.length());
-				int size = tmpAPPL.length();
-				String taille = "" + size;
-				if (size < 10) {
-					taille = Annexe.addZero(taille, 2);
-				} else if (size < 100) {
-					taille = Annexe.addZero(taille, 1);
+				message += " " + suite[1] + "###";
+				if (suite[1].equals("DIFF")) {
+					message += "# ";
+					tmpAPPL = tmpAPPL.substring(10, tmpAPPL.length());
+					int size = tmpAPPL.length();
+					String taille = "" + size;
+					if (size < 10) {
+						taille = Annexe.addZero(taille, 2);
+					} else if (size < 100) {
+						taille = Annexe.addZero(taille, 1);
+					} else if (size > 999) {
+						taille = "999";
+					}
+					message += taille + " " + tmpAPPL;
+				} else if (suite[1].equals("TRANS")) {
+					message += " REQ ";
+					int size = suite[2].length();
+					String taille = "" + size;
+					if (size < 10) {
+						taille = Annexe.addZero(taille, 1);
+					} else if (size > 99) {
+						taille = "99";
+					}
+					message += taille + " " + suite[2];
+					this.getDemandeFichier().add(suite[2]);
 				}
-				message += taille + " " + tmpAPPL;
 			}
 			if (isPossible == true) {
 				MssgUPD.membPrint(message.split(" "));
