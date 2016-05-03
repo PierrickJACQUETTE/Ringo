@@ -1,8 +1,14 @@
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Scanner;
+import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.Inet4Address;
 
 public class Annexe {
@@ -62,7 +68,7 @@ public class Annexe {
 		return str.substring(0, str.length() - 1);
 	}
 
-	protected static String convertIPV4Complete(String textAddr) {
+	protected static String serveur(String textAddr) {
 		try {
 			InetAddress ia = (Inet4Address) InetAddress.getByName(textAddr);
 			String debut = "";
@@ -71,28 +77,35 @@ public class Annexe {
 				textAddr = partie[1];
 				debut = partie[0] + "/";
 			}
-			String[] parts = textAddr.split("\\.");
-			String addrComplete = "";
-			for (String s : parts) {
-				int i = Integer.parseInt(s);
-				if ((i >= 0) && (i < 10)) {
-					addrComplete += addZero(s, 2);
-				} else if (i >= 10 && i < 99) {
-					addrComplete += addZero(s, 1);
-				} else {
-					addrComplete += addZero(s, 0);
-				}
-				addrComplete += ".";
-			}
-
-			return debut + addrComplete.substring(0, addrComplete.length() - 1);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return textAddr;
 	}
 
-	protected static String trouveAdress() {
+	private static String base(int i) {
+		return Integer.toString(i, Character.MAX_RADIX);
+	}
+
+	protected static String convertIPV4Complete(String textAddr) {
+		textAddr = serveur(textAddr);
+		String[] parts = textAddr.split("\\.");
+		String addrComplete = "";
+		for (String s : parts) {
+			int i = Integer.parseInt(s);
+			if ((i >= 0) && (i < 10)) {
+				addrComplete += addZero(s, 2);
+			} else if (i >= 10 && i < 99) {
+				addrComplete += addZero(s, 1);
+			} else {
+				addrComplete += addZero(s, 0);
+			}
+			addrComplete += ".";
+		}
+		return addrComplete.substring(0, addrComplete.length() - 1);
+	}
+
+	protected static String trouveAdress(boolean complete) {
 		try {
 			Enumeration<NetworkInterface> listNi = NetworkInterface.getNetworkInterfaces();
 			while (listNi.hasMoreElements()) {
@@ -102,7 +115,11 @@ public class Annexe {
 					while (listIa.hasMoreElements()) {
 						InetAddress iac = listIa.nextElement();
 						if (iac instanceof Inet4Address) {
-							return convertIPV4Complete(iac.toString().substring(1));
+							if (complete == true) {
+								return convertIPV4Complete(iac.toString().substring(1));
+							} else {
+								return iac.toString().substring(1);
+							}
 						}
 					}
 				}
@@ -137,7 +154,6 @@ public class Annexe {
 				System.out.println("Le nombre doit etre inferieur a 65636.");
 				return false;
 			}
-
 		}
 		return true;
 	}
@@ -170,6 +186,63 @@ public class Annexe {
 		return Integer.parseInt(str);
 	}
 
+	private static String identifiantEntite(Entite entite) {
+		String str = Annexe.serveur(trouveAdress(false));
+		String tmp = "";
+		String[] part = str.split("\\.");
+		for (String s : part) {
+			tmp += s;
+		}
+		tmp += entite.getPortTCPIn();
+		int coupure = 8;
+		int debut;
+		int suite = 0;
+		if (tmp.length() > coupure) {
+			debut = Integer.parseInt(tmp.substring(0, coupure));
+			suite = Integer.parseInt(tmp.substring(coupure, tmp.length()));
+		} else {
+			debut = Integer.parseInt(tmp);
+		}
+		str = base(debut);
+		str += base(suite);
+
+		if (str.length() > coupure) {
+			str = str.substring(str.length() - coupure, str.length());
+		} else {
+			for (int c = str.length(); c < coupure; c++) {
+				str += "0";
+			}
+		}
+		return str;
+	}
+
+	private static boolean testPortInUDP(int port) {
+		String addr = trouveAdress(true);
+		try {
+			DatagramSocket ds = new DatagramSocket(port);
+			InetSocketAddress ia = new InetSocketAddress(addr, port);
+			ds.close();
+		} catch (SocketException e) {
+			System.out.println("Erreur BindException: Adresse déjà utilisée : essayer une autre addresse (PORT UDP)");
+			return false;
+		}
+		return true;
+	}
+
+	private static boolean testPortInTCP(int port) {
+		String addr = trouveAdress(true);
+		try {
+			ServerSocket server = new ServerSocket(port);
+			Socket socket_tcp = new Socket(addr, port);
+			socket_tcp.close();
+			server.close();
+		} catch (IOException e) {
+			System.out.println("Erreur BindException: Adresse déjà utilisée : essayer une autre addresse (PORT TCP)");
+			return false;
+		}
+		return true;
+	}
+
 	protected static Entite initEntite(Entite entite, Scanner sc) {
 
 		// boolean correct = false;
@@ -177,20 +250,25 @@ public class Annexe {
 		// while (!correct) {
 		// System.out.println("Veuillez entrer son numero du port UDP : ");
 		// reponse = sc.nextLine();
-		// correct = Annexe.verifNombre(reponse, true);
+		// correct = verifNombre(reponse, true);
+		// if (correct == true) {
+		// correct = testPortInUDP(entier(reponse));
 		// }
-		// entite.setPortInUDP(Annexe.entier(reponse));
-		// entite.setPortOutUDP(Annexe.entier(reponse), 1);
+		// }
+		// entite.setPortInUDP(entier(reponse));
+		// entite.setPortOutUDP(entier(reponse), 1);
 		// correct = false;
 		// while (!correct) {
 		// System.out.println("Veuillez entrer son numero du port TCP : ");
 		// reponse = sc.nextLine();
-		// correct = Annexe.verifNombre(reponse, false);
+		// correct = verifNombre(reponse, false);
+		// if (correct == true) {
+		// correct = testPortInTCP(entier(reponse));
 		// }
-		// entite.setPortTCPIn(Annexe.entier(reponse));
+		// }
+		// entite.setPortTCPIn(entier(reponse));
 
-		String tmp = entite.getPortInUDP() + "" + entite.getPortTCPIn();
-		entite.setIdentifiant(tmp);
+		entite.setIdentifiant(identifiantEntite(entite));
 		return entite;
 	}
 

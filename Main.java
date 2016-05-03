@@ -18,7 +18,8 @@ public class Main {
 
 	private static String option;
 	protected static boolean affichage;
-	protected static final long TIMEMAX = 6000;
+	protected static final long TIMEMAX = 20000;
+	protected static final int SIZEMESSG = 512;
 
 	public static void main(String[] args) {
 		affichage = false;
@@ -39,7 +40,7 @@ public class Main {
 				correctAction = true;
 
 				entite.setPortMultiDiff(7003, 1);
-				entite.setAddrMultiDiff("239.255.000.003", 1);
+				entite.setAddrMultiDiff("238.255.000.003", 1);
 				entite.setPortInUDP(7001);
 				entite.setPortOutUDP(7001, 1);
 				entite.setPortTCPIn(7000);
@@ -51,17 +52,18 @@ public class Main {
 				if (reponse.equals("J")) {
 					joindre = true;
 				}
+
 				System.out.println("Voulez un A ou Z ou E?");
 				reponse = sc.nextLine();
 				if (reponse.equals("A")) {
 					entite.setAddrNext("127.000.000.001", 1);
 					entite.setPortTCPOut(7000);
-					entite.setPortTCPIn(6999);
+					entite.setPortTCPIn(7000);
 					entite.setPortInUDP(7002);
 					entite.setPortOutUDP(7005, 1);
 					if (joindre == false) {
 						entite.setPortMultiDiff(7007, 1);
-						entite.setAddrMultiDiff("239.255.000.005", 1);
+						entite.setAddrMultiDiff("238.255.000.005", 1);
 					}
 				} else if (reponse.equals("Z")) {
 					entite.setAddrNext("127.000.000.006", 1);
@@ -71,7 +73,7 @@ public class Main {
 					entite.setPortOutUDP(6002, 1);
 					if (joindre == false) {
 						entite.setPortMultiDiff(7007, 1);
-						entite.setAddrMultiDiff("239.255.000.004", 1);
+						entite.setAddrMultiDiff("238.255.000.004", 1);
 					}
 
 				} else {
@@ -131,10 +133,7 @@ public class Main {
 			DatagramChannel udp_multi_dc2 = null;
 			MembershipKey key2 = null;
 			while (true) {
-				if (affichage) {
-					entite.printEntiteSimple();
-					System.out.println("Waiting for messages : WHOS, GBYE, TEST, APPL DIFF mess");
-				}
+				System.out.println("Waiting for messages : WHOS, GBYE, TEST, INFO [SIMPLE|COMPLEX], APPL DIFF mess");
 				if (first == true && entite.getIsDuplicateur() == true) {
 					NetworkInterface interf2 = NetworkInterface.getByName("eth0"); // wlan0
 					InetAddress group2 = (Inet4Address) InetAddress.getByName(entite.getAddrMultiDiff(2));

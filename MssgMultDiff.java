@@ -39,6 +39,9 @@ public class MssgMultDiff extends Thread {
 			byte[] data;
 			String s = "DOWN";
 			data = s.getBytes();
+			if (data.length > Main.SIZEMESSG) {
+				throw new LengthException(data.length, s, "MULTI DIFF envoi");
+			}
 			InetSocketAddress ia = new InetSocketAddress(this.entite.getAddrMultiDiff(anneau),
 					this.entite.getPortMultiDiff(anneau));
 			DatagramPacket paquet = new DatagramPacket(data, data.length, ia);
@@ -46,6 +49,8 @@ public class MssgMultDiff extends Thread {
 			if (Main.affichage) {
 				System.out.println("Message multi diff envoyé : " + s);
 			}
+		} catch (LengthException e) {
+			e.getMessage();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -61,6 +66,9 @@ public class MssgMultDiff extends Thread {
 			String st = new String(buff.array(), 0, buff.array().length).trim();
 			if (Main.affichage) {
 				System.out.println("Message recu : " + st);
+			}
+			if (st.length() > Main.SIZEMESSG) {
+				throw new LengthException(st.length(), st, "MULTI DIFF recu");
 			}
 			String[] part = st.split(" ");
 			if (part[0].equals("DOWN")) {
@@ -92,6 +100,8 @@ public class MssgMultDiff extends Thread {
 					e.getMessage();
 				}
 			}
+		} catch (LengthException e) {
+			e.getMessage();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -117,6 +127,7 @@ public class MssgMultDiff extends Thread {
 		entite.setPortOutUDP(portOutUDp, anneau);
 		entite.setAddrMultiDiff(addrMulti, anneau);
 		entite.setPortMultiDiff(portMulti, anneau);
+		entite.setMssgTransmisAnneau2(new ArrayList<String>());
 		return entite;
 	}
 

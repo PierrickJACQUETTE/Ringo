@@ -27,12 +27,11 @@ public class VerifEntree {
 	protected static Entite nouveauAnneau(Entite entite, Scanner sc) {
 		String reponse = "";
 		entite = Annexe.initEntite(entite, sc);
-		entite.setAddrNext(Annexe.trouveAdress(), 1);
+		entite.setAddrNext(Annexe.trouveAdress(true), 1);
 
 		entite = initMultidiff(entite, sc, 1);
 
-		System.out.println("Vous venez de créer une entité avec ses attributs : ");
-		entite.printEntiteSimple();
+		printNewEntite(entite);
 		return entite;
 	}
 
@@ -61,10 +60,14 @@ public class VerifEntree {
 			entite = initMultidiff(entite, sc, 2);
 		}
 
+		printNewEntite(entite);
+		return entite;
+	}
+
+	private static void printNewEntite(Entite entite) {
 		if (Main.affichage) {
 			System.out.println("Vous venez de créer une entité avec ses attributs : ");
 			entite.printEntiteSimple();
 		}
-		return entite;
 	}
 }

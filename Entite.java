@@ -78,7 +78,7 @@ public class Entite implements Runnable {
 		printMssgAnneau(this.mssgTransmisAnnneau2);
 		System.out.println();
 
-		System.out.println("Les messages transmis test par  cette entité sont : ");
+		System.out.println("Les messages transmis test par cette entité sont : ");
 		System.out.println("Sur l'anneau 1 : ");
 		printMssgTestAnneau(this.aLL1);
 		System.out.println("Sur l'anneau 2 : ");
@@ -261,7 +261,14 @@ public class Entite implements Runnable {
 				String tmp = sc.nextLine();
 				String tmp2 = new String(tmp);
 				String[] suite = null;
-				if (tmp.equals("WHOS")) {
+				boolean info = false;
+				if (tmp.equals("INFO SIMPLE")) {
+					this.printEntiteSimple();
+					info = true;
+				} else if (tmp.equals("INFO COMPLEX")) {
+					this.printEntiteComplex();
+					info = true;
+				} else if (tmp.equals("WHOS")) {
 					envoi("MEMB", "", suite, true);
 				} else if (tmp.contains("APPL")) {
 					suite = tmp.split(" ");
@@ -270,7 +277,9 @@ public class Entite implements Runnable {
 					}
 					tmp = suite[0];
 				}
-				envoi(tmp, tmp2, suite, false);
+				if (info == false) {
+					envoi(tmp, tmp2, suite, false);
+				}
 			} catch (LengthException e) {
 				e.printStackTrace();
 			}
@@ -292,9 +301,10 @@ public class Entite implements Runnable {
 			String idm = Annexe.newIdentifiant();
 			String message = tmp + " " + idm;
 			if (tmp.equals("MEMB")) {
-				message = "MEMB " + idm + " " + this.identifiant + " " + Annexe.trouveAdress() + " " + this.portInUDP;
+				message = "MEMB " + idm + " " + this.identifiant + " " + Annexe.trouveAdress(true) + " "
+						+ this.portInUDP;
 			} else if (tmp.equals("GBYE")) {
-				message += " " + Annexe.trouveAdress() + " " + this.portInUDP + " " + this.addrNext[i - 1] + " "
+				message += " " + Annexe.trouveAdress(true) + " " + this.portInUDP + " " + this.addrNext[i - 1] + " "
 						+ this.portOutUDP[i - 1];
 			} else if (tmp.equals("TEST")) {
 				message += " " + this.addrMultiDiff[i - 1] + " " + this.portMultiDiff[i - 1];

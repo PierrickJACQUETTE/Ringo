@@ -16,7 +16,7 @@ public class MssgTCP {
 
 			// WELC ou NOTC
 			String message = receiveTCP(br, entite, tcp_pw, socket_tcp);
-			analyseMssg(message, tcp_pw);
+			analyseMssg(message);
 			message = Annexe.substringLast(message);
 
 			String[] parts = message.split(" ");
@@ -30,16 +30,17 @@ public class MssgTCP {
 
 				String send = "";
 				if (joindre == true) {
-					send = "NEWC " + Annexe.trouveAdress() + " " + entite.getPortInUDP() + "\n";
+					send = "NEWC " + Annexe.trouveAdress(true) + " " + entite.getPortInUDP() + "\n";
 				} else {
-					send = "DUPL " + Annexe.trouveAdress() + " " + entite.getPortInUDP() + " "
+					send = "DUPL " + Annexe.trouveAdress(true) + " " + entite.getPortInUDP() + " "
 							+ entite.getAddrMultiDiff(1) + " " + entite.getPortMultiDiff(1) + "\n";
 				}
+				analyseMssg(send);
 				sendTCP(send, tcp_pw);
 
 				// ACKC ou ACKD
 				message = receiveTCP(br, entite, tcp_pw, socket_tcp);
-				analyseMssg(message, tcp_pw);
+				analyseMssg(message);
 				message = Annexe.substringLast(message);
 				if (joindre == false) {
 					parts = message.split(" ");
@@ -56,6 +57,8 @@ public class MssgTCP {
 
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (MssgSpellCheck e) {
+			e.getMessage();
 		} catch (LengthException e) {
 			e.getMessage();
 			System.exit(0);
@@ -66,67 +69,78 @@ public class MssgTCP {
 		return entite;
 	}
 
-	protected static Entite insertAnneauTCP(Entite entite, ServerSocketChannel tcp_in_ssc) throws IOException {
+	protected static Entite insertAnneauTCP(Entite entite, ServerSocketChannel tcp_in_ssc) {
 		if (Main.affichage) {
 			System.out.println("Evenement sur TCP");
 		}
-		Socket sock_tcp = tcp_in_ssc.socket().accept();
-		if (Main.affichage) {
-			System.out.println("Acceptation TCP");
-		}
-		BufferedReader tcp_br = new BufferedReader(new InputStreamReader(sock_tcp.getInputStream()));
-		PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(sock_tcp.getOutputStream()));
-
-		String mssg = "";
-		if (entite.getIsDuplicateur() == false) {
-			// WELC
-			mssg = "WELC " + entite.getAddrNext(1) + " " + entite.getPortOutUDP(1) + " " + entite.getAddrMultiDiff(1)
-					+ " " + entite.getPortMultiDiff(1) + "\n";
-		} else {
-			// NOTC
-			mssg = "NOTC\n";
-		}
-		sendTCP(mssg, tcp_pw);
-
-		if (entite.getIsDuplicateur() == false) {
-			// NEWC ou DUPL
-			String lu = receiveTCP(tcp_br, entite, tcp_pw, sock_tcp);
-			lu = Annexe.substringLast(lu);
-			String parts[] = lu.split(" ");
-			String futurAddrUDPOut = parts[1];
-			String futurPortUDPOut = parts[2];
-			int anneau = 1;
-			String futurMultiDiffAddr = "";
-			String futurMultiDiffPort = "";
-			String envoi = "";
-			boolean demandeDupplication = false;
-			if (parts[0].equals("NEWC")) {
-				envoi = "ACKC\n";
-			} else if (parts[0].equals("DUPL")) {
-				anneau = 2;
-				futurMultiDiffAddr = parts[3];
-				futurMultiDiffPort = parts[4];
-				envoi = "ACKD " + entite.getPortInUDP() + "\n";
-				demandeDupplication = true;
+		try {
+			Socket sock_tcp = tcp_in_ssc.socket().accept();
+			if (Main.affichage) {
+				System.out.println("Acceptation TCP");
 			}
+			BufferedReader tcp_br = new BufferedReader(new InputStreamReader(sock_tcp.getInputStream()));
+			PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(sock_tcp.getOutputStream()));
 
-			sendTCP(envoi, tcp_pw);
-
-			entite.setAddrNext(futurAddrUDPOut, anneau);
-			entite.setPortOutUDP(Integer.parseInt(futurPortUDPOut), anneau);
-			if (parts[0].equals("DUPL")) {
-				entite.setAddrMultiDiff(futurMultiDiffAddr, 2);
-				entite.setPortMultiDiff(Integer.parseInt(futurMultiDiffPort), 2);
+			String mssg = "";
+			if (entite.getIsDuplicateur() == false) {
+				// WELC
+				mssg = "WELC " + entite.getAddrNext(1) + " " + entite.getPortOutUDP(1) + " "
+						+ entite.getAddrMultiDiff(1) + " " + entite.getPortMultiDiff(1) + "\n";
+			} else {
+				// NOTC
+				mssg = "NOTC\n";
 			}
+			analyseMssg(mssg);
+			sendTCP(mssg, tcp_pw);
 
-			closeTCP(entite, tcp_br, tcp_pw, sock_tcp);
-			entite.setIsDuplicateur(demandeDupplication);
-			print(false, entite);
-		} else {
-			closeTCP(entite, tcp_br, tcp_pw, sock_tcp);
-			print(true, entite);
+			if (entite.getIsDuplicateur() == false) {
+				// NEWC ou DUPL
+				String lu = receiveTCP(tcp_br, entite, tcp_pw, sock_tcp);
+				analyseMssg(lu);
+				lu = Annexe.substringLast(lu);
+				String parts[] = lu.split(" ");
+				String futurAddrUDPOut = parts[1];
+				String futurPortUDPOut = parts[2];
+				int anneau = 1;
+				String futurMultiDiffAddr = "";
+				String futurMultiDiffPort = "";
+				String envoi = "";
+				boolean demandeDupplication = false;
+				if (parts[0].equals("NEWC")) {
+					envoi = "ACKC\n";
+				} else if (parts[0].equals("DUPL")) {
+					anneau = 2;
+					futurMultiDiffAddr = parts[3];
+					futurMultiDiffPort = parts[4];
+					envoi = "ACKD " + entite.getPortInUDP() + "\n";
+					demandeDupplication = true;
+				}
+				analyseMssg(envoi);
+				sendTCP(envoi, tcp_pw);
+
+				entite.setAddrNext(futurAddrUDPOut, anneau);
+				entite.setPortOutUDP(Integer.parseInt(futurPortUDPOut), anneau);
+				if (parts[0].equals("DUPL")) {
+					entite.setAddrMultiDiff(futurMultiDiffAddr, 2);
+					entite.setPortMultiDiff(Integer.parseInt(futurMultiDiffPort), 2);
+				}
+
+				closeTCP(entite, tcp_br, tcp_pw, sock_tcp);
+				entite.setIsDuplicateur(demandeDupplication);
+				print(false, entite);
+			} else {
+				closeTCP(entite, tcp_br, tcp_pw, sock_tcp);
+				print(true, entite);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (MssgSpellCheck e) {
+			e.getMessage();
+		} catch (LengthException e) {
+			e.getMessage();
+		} catch (NotSDLException e) {
+			e.getMessage();
 		}
-
 		return entite;
 	}
 
@@ -186,17 +200,21 @@ public class MssgTCP {
 		return null;
 	}
 
-	private static void analyseMssg(String mssg, PrintWriter pw) throws LengthException, NotSDLException {
+	private static void analyseMssg(String mssg) throws LengthException, NotSDLException, MssgSpellCheck {
 		String parts[] = mssg.split(" ");
+		if (mssg.length() > Main.SIZEMESSG) {
+			throw new LengthException(mssg.length(), mssg, "TCP");
+		}
 		if (parts[0].equals("WELC") || parts[0].equals("DUPL")) {
-			int longeur = 5;
-			suiteAnalyseMssg(longeur, mssg, parts);
-		} else if (parts[0].equals("ACKC") || parts[0].equals("NOTC")) {
-			int longeur = 1;
-			suiteAnalyseMssg(longeur, mssg, parts);
+			suiteAnalyseMssg(5, mssg, parts);
+		} else if (parts[0].equals("ACKC\n") || parts[0].equals("NOTC\n")) {
+			suiteAnalyseMssg(1, mssg, parts);
 		} else if (parts[0].equals("ACKD")) {
-			int longeur = 2;
-			suiteAnalyseMssg(longeur, mssg, parts);
+			suiteAnalyseMssg(2, mssg, parts);
+		} else if (parts[0].equals("NEWC")) {
+			suiteAnalyseMssg(3, mssg, parts);
+		} else {
+			throw new MssgSpellCheck(parts[0], "TCP");
 		}
 	}
 
