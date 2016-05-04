@@ -1,18 +1,7 @@
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.net.ServerSocket;
-import java.net.StandardProtocolFamily;
-import java.net.StandardSocketOptions;
-import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
-import java.nio.channels.MembershipKey;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.util.Iterator;
 import java.util.Scanner;
+
+//ip addr show
+//ifconfig
 
 public class Main {
 
@@ -20,6 +9,7 @@ public class Main {
 	protected static boolean affichage;
 	protected static final long TIMEMAX = 20000;
 	protected static final int SIZEMESSG = 512;
+	protected static final String TYPECONN = "eth0"; // bond0 ou wlan0
 
 	public static void main(String[] args) {
 		affichage = false;

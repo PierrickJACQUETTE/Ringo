@@ -13,10 +13,8 @@ public class Entite implements Runnable {
 	private int[] portMultiDiff;
 	private boolean isDuplicateur;
 	private boolean alreadyReceivedEYBG;
-	private ArrayList<String> mssgTransmisAnnneau1;
-	private ArrayList<String> mssgTransmisAnnneau2;
-	private ArrayList<Long> aLL1;
-	private ArrayList<Long> aLL2;
+	private ArrayList<Mssg> mssgTransmisAnnneau1;
+	private ArrayList<Mssg> mssgTransmisAnnneau2;
 	private ArrayList<String> demandeFichier;
 
 	public Entite() {
@@ -34,10 +32,8 @@ public class Entite implements Runnable {
 		this.portMultiDiff[1] = -1;
 		this.isDuplicateur = false;
 		this.alreadyReceivedEYBG = false;
-		this.mssgTransmisAnnneau1 = new ArrayList<String>();
-		this.mssgTransmisAnnneau2 = new ArrayList<String>();
-		this.aLL1 = new ArrayList<Long>();
-		this.aLL2 = new ArrayList<Long>();
+		this.mssgTransmisAnnneau1 = new ArrayList<Mssg>();
+		this.mssgTransmisAnnneau2 = new ArrayList<Mssg>();
 		this.demandeFichier = new ArrayList<String>();
 	}
 
@@ -59,15 +55,9 @@ public class Entite implements Runnable {
 		System.out.println();
 	}
 
-	private void printMssgAnneau(ArrayList<String> arl) {
+	private void printMssgAnneau(ArrayList<Mssg> arl) {
 		for (int i = 0; i < arl.size(); i++) {
-			System.out.println(i + " : " + arl.get(i));
-		}
-	}
-
-	private void printMssgTestAnneau(ArrayList<Long> arl) {
-		for (int i = 0; i < arl.size(); i++) {
-			System.out.println(i + " : " + arl.get(i));
+			System.out.println(i + " : " + arl.get(i).getIdm());
 		}
 	}
 
@@ -78,13 +68,6 @@ public class Entite implements Runnable {
 		printMssgAnneau(this.mssgTransmisAnnneau1);
 		System.out.println("Sur l'anneau 2 : ");
 		printMssgAnneau(this.mssgTransmisAnnneau2);
-		System.out.println();
-
-		System.out.println("Les messages transmis test par cette entité sont : ");
-		System.out.println("Sur l'anneau 1 : ");
-		printMssgTestAnneau(this.aLL1);
-		System.out.println("Sur l'anneau 2 : ");
-		printMssgTestAnneau(this.aLL2);
 		System.out.println();
 	}
 
@@ -224,36 +207,20 @@ public class Entite implements Runnable {
 		this.alreadyReceivedEYBG = alreadyReceivedEYBG;
 	}
 
-	public ArrayList<String> getMssgTransmisAnneau1() {
+	public ArrayList<Mssg> getMssgTransmisAnneau1() {
 		return this.mssgTransmisAnnneau1;
 	}
 
-	public void setMssgTransmisAnneau1(ArrayList<String> mssgTransmis) {
+	public void setMssgTransmisAnneau1(ArrayList<Mssg> mssgTransmis) {
 		this.mssgTransmisAnnneau1 = mssgTransmis;
 	}
 
-	public ArrayList<String> getMssgTransmisAnneau2() {
+	public ArrayList<Mssg> getMssgTransmisAnneau2() {
 		return this.mssgTransmisAnnneau2;
 	}
 
-	public void setMssgTransmisAnneau2(ArrayList<String> mssgTransmis) {
+	public void setMssgTransmisAnneau2(ArrayList<Mssg> mssgTransmis) {
 		this.mssgTransmisAnnneau2 = mssgTransmis;
-	}
-
-	public ArrayList<Long> getALL1() {
-		return this.aLL1;
-	}
-
-	public void setALL1(ArrayList<Long> aLL1) {
-		this.aLL1 = aLL1;
-	}
-
-	public ArrayList<Long> getALL2() {
-		return this.aLL2;
-	}
-
-	public void setALL2(ArrayList<Long> aLL2) {
-		this.aLL2 = aLL2;
 	}
 
 	public ArrayList<String> getDemandeFichier() {
@@ -295,12 +262,20 @@ public class Entite implements Runnable {
 		}
 	}
 
+	private Mssg test(String tmp, String idm) {
+		Mssg m = new Mssg(idm);
+		if (tmp.equals("TEST")) {
+			m = new MssgTransmisTest(idm, true, System.nanoTime());
+		}
+		return m;
+	}
+
 	private void envoi(String tmp, String tmp2, String[] suite, boolean isPossible) {
 		String idm = sendAnneau(tmp, tmp2, 1, suite, isPossible);
-		this.mssgTransmisAnnneau1.add(idm);
+		this.mssgTransmisAnnneau1.add(test(tmp, idm));
 		if (this.isDuplicateur == true) {
 			idm = sendAnneau(tmp, tmp2, 2, suite, isPossible);
-			this.mssgTransmisAnnneau2.add(idm);
+			this.mssgTransmisAnnneau2.add(test(tmp, idm));
 		}
 	}
 
@@ -317,11 +292,6 @@ public class Entite implements Runnable {
 						+ this.portOutUDP[i - 1];
 			} else if (tmp.equals("TEST")) {
 				message += " " + this.addrMultiDiff[i - 1] + " " + this.portMultiDiff[i - 1];
-				if (i == 1) {
-					this.aLL1.add(Long.parseLong(idm));
-				} else if (i == 2) {
-					this.aLL2.add(Long.parseLong(idm));
-				}
 			} else if (tmp.equals("APPL")) {
 				message += " " + suite[1] + "###";
 				if (suite[1].equals("DIFF")) {

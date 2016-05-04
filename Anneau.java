@@ -40,7 +40,7 @@ public class Anneau {
 			// ------------------------------------------------
 
 			// ------------ MULTI DIFF NON BLOQUANT -----------
-			NetworkInterface interf = NetworkInterface.getByName("eth0"); // wlan0
+			NetworkInterface interf = NetworkInterface.getByName(Main.TYPECONN);
 			InetAddress group = (Inet4Address) InetAddress.getByName(entite.getAddrMultiDiff(1));
 			DatagramChannel udp_multi_dc;
 			udp_multi_dc = DatagramChannel.open(StandardProtocolFamily.INET)
@@ -67,7 +67,7 @@ public class Anneau {
 			while (true) {
 				Annexe.waitAMssg();
 				if (first == true && entite.getIsDuplicateur() == true) {
-					NetworkInterface interf2 = NetworkInterface.getByName("eth0"); // wlan0
+					NetworkInterface interf2 = NetworkInterface.getByName(Main.TYPECONN);
 					InetAddress group2 = (Inet4Address) InetAddress.getByName(entite.getAddrMultiDiff(2));
 					udp_multi_dc2 = DatagramChannel.open(StandardProtocolFamily.INET)
 							.setOption(StandardSocketOptions.SO_REUSEADDR, true)

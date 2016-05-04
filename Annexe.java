@@ -128,7 +128,7 @@ public class Annexe {
 			Enumeration<NetworkInterface> listNi = NetworkInterface.getNetworkInterfaces();
 			while (listNi.hasMoreElements()) {
 				NetworkInterface nic = listNi.nextElement();
-				if (!nic.getName().equals("lo")) { // eth0
+				if (!nic.getName().equals("lo")) {
 					Enumeration<InetAddress> listIa = nic.getInetAddresses();
 					while (listIa.hasMoreElements()) {
 						InetAddress iac = listIa.nextElement();
@@ -183,7 +183,7 @@ public class Annexe {
 
 	protected static void waitAMssg() {
 		System.out.println(
-				"Waiting for messages : WHOS, GBYE, TEST, INFO [SIMPLE|COMPLEX], APPL [DIFF mess| TRANS nom_fichier");
+				"\nWaiting for messages : WHOS, GBYE, TEST, INFO [SIMPLE|COMPLEX], APPL [DIFF mess| TRANS nom_fichier]\n");
 	}
 
 	protected static boolean verifAddress(String str, boolean isIPV4) {

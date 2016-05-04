@@ -19,15 +19,21 @@ public class MssgMultDiff extends Thread {
 
 	protected void declencheMultiDiff(int anneau) {
 		if (anneau == 1) {
-			for (int i = 0; i < this.entite.getALL1().size(); i++) {
-				if (System.nanoTime() - this.entite.getALL1().get(i) > Main.TIMEMAX) {
-					this.sendMutiDiff(anneau);
+			for (Mssg mssg : this.entite.getMssgTransmisAnneau1()) {
+				if (mssg instanceof MssgTransmisTest) {
+					MssgTransmisTest m = (MssgTransmisTest) mssg;
+					if (System.nanoTime() - m.getTime() > Main.TIMEMAX && m.getIsTest() == true) {
+						this.sendMutiDiff(anneau);
+					}
 				}
 			}
 		} else if (anneau == 2) {
-			for (int i = 0; i < this.entite.getALL2().size(); i++) {
-				if (System.nanoTime() - this.entite.getALL2().get(i) > Main.TIMEMAX) {
-					this.sendMutiDiff(anneau);
+			for (Mssg mssg : this.entite.getMssgTransmisAnneau2()) {
+				if (mssg instanceof MssgTransmisTest) {
+					MssgTransmisTest m = (MssgTransmisTest) mssg;
+					if (System.nanoTime() - m.getTime() > Main.TIMEMAX && m.getIsTest() == true) {
+						this.sendMutiDiff(anneau);
+					}
 				}
 			}
 		}
@@ -115,19 +121,17 @@ public class MssgMultDiff extends Thread {
 			addrMulti = entite.getAddrMultiDiff(2);
 			portOutUDp = entite.getPortOutUDP(2);
 			portMulti = entite.getPortMultiDiff(2);
-			entite.setALL1(entite.getALL2());
 			entite.setMssgTransmisAnneau1(entite.getMssgTransmisAnneau2());
 
 		} else {
 			addrMulti = addrNext = null;
 			portMulti = portOutUDp = -1;
-			entite.setALL2(new ArrayList<Long>());
 		}
 		entite.setAddrNext(addrNext, anneau);
 		entite.setPortOutUDP(portOutUDp, anneau);
 		entite.setAddrMultiDiff(addrMulti, anneau);
 		entite.setPortMultiDiff(portMulti, anneau);
-		entite.setMssgTransmisAnneau2(new ArrayList<String>());
+		entite.setMssgTransmisAnneau2(new ArrayList<Mssg>());
 		return entite;
 	}
 
