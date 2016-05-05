@@ -15,7 +15,7 @@ public class Entite implements Runnable {
 	private boolean alreadyReceivedEYBG;
 	private ArrayList<Mssg> mssgTransmisAnnneau1;
 	private ArrayList<Mssg> mssgTransmisAnnneau2;
-	private ArrayList<String> demandeFichier;
+	private ArrayList<MssgApplDemande> demandeFichier;
 
 	public Entite() {
 		this.identifiant = "-1";
@@ -34,7 +34,7 @@ public class Entite implements Runnable {
 		this.alreadyReceivedEYBG = false;
 		this.mssgTransmisAnnneau1 = new ArrayList<Mssg>();
 		this.mssgTransmisAnnneau2 = new ArrayList<Mssg>();
-		this.demandeFichier = new ArrayList<String>();
+		this.demandeFichier = new ArrayList<MssgApplDemande>();
 	}
 
 	public void printEntiteSimple() {
@@ -54,8 +54,8 @@ public class Entite implements Runnable {
 		System.out.println("Si cest un dupp et deja recu EYBE ? " + this.alreadyReceivedEYBG);
 		System.out.println();
 	}
-
-	private void printMssgAnneau(ArrayList<Mssg> arl) {
+	
+	private void printMssgAnneau(ArrayList<? extends Mssg> arl) {
 		for (int i = 0; i < arl.size(); i++) {
 			System.out.println(i + " : " + arl.get(i).getIdm());
 		}
@@ -69,6 +69,9 @@ public class Entite implements Runnable {
 		System.out.println("Sur l'anneau 2 : ");
 		printMssgAnneau(this.mssgTransmisAnnneau2);
 		System.out.println();
+		
+		System.out.println("Les demandes de fichiers sont : ");
+		printMssgAnneau(this.getDemandeFichier());
 	}
 
 	public String getIdentifiant() {
@@ -223,11 +226,11 @@ public class Entite implements Runnable {
 		this.mssgTransmisAnnneau2 = mssgTransmis;
 	}
 
-	public ArrayList<String> getDemandeFichier() {
+	public ArrayList<MssgApplDemande> getDemandeFichier() {
 		return this.demandeFichier;
 	}
 
-	public void setDemandeFichier(ArrayList<String> list) {
+	public void setDemandeFichier(ArrayList<MssgApplDemande> list) {
 		this.demandeFichier = list;
 	}
 
@@ -262,24 +265,31 @@ public class Entite implements Runnable {
 		}
 	}
 
-	private Mssg test(String tmp, String idm) {
+	private Mssg trans(String idm, String message, int anneau){
 		Mssg m = new Mssg(idm);
-		if (tmp.equals("TEST")) {
+		String parts [] = message.split(" ");
+		if(anneau == 1 && parts[3].equals("REQ")) {
+			m = new MssgApplDemande(parts[5], message);
+			this.getDemandeFichier().add((MssgApplDemande) m);
+			m= new MssgApplDemande(idm, message);
+		}
+		if (parts[0].equals("TEST")) {
 			m = new MssgTransmisTest(idm, true, System.nanoTime());
 		}
 		return m;
+		
 	}
 
 	private void envoi(String tmp, String tmp2, String[] suite, boolean isPossible) {
-		String idm = sendAnneau(tmp, tmp2, 1, suite, isPossible);
-		this.mssgTransmisAnnneau1.add(test(tmp, idm));
+		Mssg m = sendAnneau(tmp, tmp2, 1, suite, isPossible);
+		this.mssgTransmisAnnneau1.add(m);
 		if (this.isDuplicateur == true) {
-			idm = sendAnneau(tmp, tmp2, 2, suite, isPossible);
-			this.mssgTransmisAnnneau2.add(test(tmp, idm));
+			m = sendAnneau(tmp, tmp2, 2, suite, isPossible);
+			this.mssgTransmisAnnneau2.add(m);
 		}
 	}
 
-	private String sendAnneau(String tmp, String tmpAPPL, int i, String[] suite, boolean isPossible) {
+	private Mssg sendAnneau(String tmp, String tmpAPPL, int i, String[] suite, boolean isPossible) {
 		try {
 			tmp = Annexe.removeWhite(tmp);
 			String idm = Annexe.newIdentifiant();
@@ -298,26 +308,13 @@ public class Entite implements Runnable {
 					message += "# ";
 					tmpAPPL = tmpAPPL.substring(10, tmpAPPL.length());
 					int size = tmpAPPL.length();
-					String taille = "" + size;
-					if (size < 10) {
-						taille = Annexe.addZero(taille, 2);
-					} else if (size < 100) {
-						taille = Annexe.addZero(taille, 1);
-					} else if (size > 999) {
-						taille = "999";
-					}
+					String taille = Annexe.remplirZero(size,3);
 					message += taille + " " + tmpAPPL;
 				} else if (suite[1].equals("TRANS")) {
 					message += " REQ ";
 					int size = suite[2].length();
-					String taille = "" + size;
-					if (size < 10) {
-						taille = Annexe.addZero(taille, 1);
-					} else if (size > 99) {
-						taille = "99";
-					}
+					String taille = Annexe.remplirZero(size,2);
 					message += taille + " " + suite[2];
-					this.getDemandeFichier().add(suite[2]);
 				}
 			}
 			if (isPossible == true) {
@@ -327,7 +324,7 @@ public class Entite implements Runnable {
 				MssgUPD.analyseMssg(message, false);
 			}
 			MssgUPD.sendUDP(message, this, idm, i);
-			return idm;
+			return trans(idm, message,i);
 		} catch (LengthException e) {
 			e.getMessage();
 		} catch (MssgSpellCheck e) {

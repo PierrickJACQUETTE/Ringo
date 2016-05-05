@@ -15,26 +15,26 @@ public class Mssg{
 		this.idm = idm;
 	}
 	
-    public static boolean my_contains(ArrayList<Mssg> aL,String idm){
+    public boolean my_contains(ArrayList<? extends Mssg> aL){
         for(int i=0;i<aL.size();i++){
-            if(aL.get(i).getIdm().equals(idm)){
+            if(aL.get(i).getIdm().equals(this.idm)){
                 return true;
             }
         }
         return false;
     }
     
-    protected static int position(ArrayList<Mssg> aL,String idm){
+    protected int position(ArrayList<? extends Mssg> aL){
     	 for(int i=0;i<aL.size();i++){
-    		 if(aL.get(i).getIdm().equals(idm)){
+    		 if(aL.get(i).getIdm().equals(this.idm)){
     			 return i;
     		 }
     	 }
     	 return -1;
     }
-
-    public static void my_remove(ArrayList<Mssg> aL, String idm){
-        int i = position(aL, idm);
+    
+    public void my_remove(ArrayList<? extends Mssg> aL){
+        int i = this.position(aL);
         if(i!=-1){
         	aL.remove(i);
         }

@@ -65,8 +65,15 @@ public class Annexe {
 		}
 		return false;
 	}
+	
+	protected static  String remplirZero(int size, int sizeVoulu){
+		String taille = "" + size;
+		taille = Annexe.addZero(taille, 16);
+		taille = taille.substring(taille.length()-sizeVoulu, taille.length());
+		return taille;
+	}
 
-	protected static String addZero(String str, int nbrZero) {
+	private static String addZero(String str, int nbrZero) {
 		String res = "";
 		for (int i = 0; i < nbrZero; i++) {
 			res += "0";
@@ -209,27 +216,20 @@ public class Annexe {
 		return Integer.parseInt(str);
 	}
 
-	protected static String littleEndian(int i) {
-		ByteBuffer byteBuffer = ByteBuffer.allocate(8);
-		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-		byteBuffer.putInt(i);
-		byte[] result = byteBuffer.array();
-		String s = Arrays.toString(result);
-		s = s.replaceAll(", ", "");
-		s = s.substring(1, s.length() - 1);
-		return s;
+	protected static int sizeBuffApplSend(){
+		// APPL_8_TRANS###_SEN_8_8_3_ => 4+9+9+4+9+9+5 => 49
+		return Main.SIZEMESSG - 49;
 	}
 
+	
 	protected static int nbrMssgApplTrans(String name) {
 		File fileIn = new File(name);
 		FileInputStream fis;
 		int res = 0;
 		try {
 			fis = new FileInputStream(fileIn);
-			int sizeFicher = fis.available();
-			// APPL_8_TRANS###_SEN_8_8_3_ => 4+9+9+4+9+9+5 => 49
-			int maxMssg = Main.SIZEMESSG - 49;
-			res = (sizeFicher / maxMssg) + 1;
+			res = (fis.available() / sizeBuffApplSend()) + 1;
+			fis.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
