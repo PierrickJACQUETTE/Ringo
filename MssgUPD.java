@@ -19,9 +19,14 @@ public class MssgUPD {
 		}
 		try {
 			udp_in_dc.receive(buff);
-			String st = new String(buff.array(), 0, buff.array().length).trim();
+			String st = new String(buff.array(), 0, buff.array().length);
 			if (Main.affichage) {
 				System.out.println("Message recu : " + st);
+			}
+			if (st.contains("TRANS### ROK") && st.startsWith("APPL")) {
+
+			} else {
+				st = st.trim();
 			}
 			analyseMssg(st, true);
 			String parts[] = st.split(" ");
@@ -279,7 +284,7 @@ public class MssgUPD {
 		}
 	}
 
-	private static String corpsDuMssgAPPL(String[] parts,int debut) {
+	private static String corpsDuMssgAPPL(String[] parts, int debut) {
 		String messageDIFF = "";
 		for (int i = debut; i < parts.length; i++) {
 			messageDIFF += parts[i];
@@ -297,15 +302,17 @@ public class MssgUPD {
 		case "REQ":
 			if (Annexe.listerRepertoire(parts[5])) {
 				retransmet = false;
-				int nbMssg = Annexe.nbrMssgApplTrans(parts[5]); //verifier taille 8 0000
-				
+
+				// int nbMssg = Annexe.nbrMssgApplTrans(parts[5]);
+				String nbMssg = Annexe.toLittleEndian(Annexe.nbrMssgApplTrans(parts[5]) + ""); // Little
+																								// endian
+
 				String idm = Annexe.newIdentifiant();
 				String message = "APPL " + idm + " TRANS### ROK ";
 				String idmM = Annexe.newIdentifiant();
-				message += idmM + " " + parts[4] + " " + parts[5] + " "+nbMssg; // LITTLE
-																			// ENDIAN
+				message += idmM + " " + parts[4] + " " + parts[5] + " " + nbMssg;
 
-				sendAnneau(message, entite, idmM);
+				sendAnneau(message, entite, idmM, false);
 				mssgAPPLSEN(idmM, parts[5], entite);
 			}
 			break;
@@ -315,8 +322,12 @@ public class MssgUPD {
 			if (m.my_contains(entite.getDemandeFichier())) {
 				int pos = m.position(entite.getDemandeFichier());
 				entite.getDemandeFichier().get(pos).setIdTrans(parts[4]);
-				entite.getDemandeFichier().get(pos).setNmbDeMssg(Integer.parseInt(parts[7])); // LITTLE ENDIAN A RETIRER
-				entite.printEntiteComplex();
+
+				// entite.getDemandeFichier().get(pos).setNmbDeMssg(Integer.parseInt(parts[7]));
+				String string = Annexe.littleEndianTo(parts[7]); // Litttle
+																	// endian
+
+				entite.getDemandeFichier().get(pos).setNmbDeMssg(Integer.parseInt(string));
 				retransmet = false;
 			}
 			break;
@@ -326,10 +337,16 @@ public class MssgUPD {
 				retransmet = false;
 				int pos = MssgApplDemande.position(entite.getDemandeFichier(), parts[4]);
 				m = entite.getDemandeFichier().get(pos);
-				if (m.getNumeroMssgRecu() + 1 == Integer.parseInt(parts[5])) {
-					m.setNumeroMssgRecu(Integer.parseInt(parts[5]));
+				String string = Annexe.littleEndianTo(parts[5]); // little
+																	// endian;
+				if (m.getNumeroMssgRecu() + 1 == Integer.parseInt(string)) {
+
+					// m.setNumeroMssgRecu(Integer.parseInt(parts[5));
+
+					m.setNumeroMssgRecu(Integer.parseInt(string));
+
 					m.addContenu(corpsDuMssgAPPL(parts, 7));
-					if (m.getNmbDeMssg()-1 == m.getNumeroMssgRecu()) {
+					if (m.getNmbDeMssg() - 1 == m.getNumeroMssgRecu()) {
 						File fileOut = new File(m.getIdm());
 						FileOutputStream fos;
 						try {
@@ -345,6 +362,13 @@ public class MssgUPD {
 					}
 				} else {
 					System.out.println("Transfert de fichier, probleme dans la reception de l'ordre des mssg");
+					System.out.println("Je recommence");
+					String mssgDeDemande = m.getMssgReq();
+					String decoupeDebut = mssgDeDemande.substring(0, 4);
+					String decoupeFin = mssgDeDemande.substring(14, mssgDeDemande.length());
+					String idmNew = Annexe.newIdentifiant();
+					String finale = decoupeDebut + " " + idmNew + " " + decoupeFin;
+					sendAnneau(finale, entite, idmNew, true);
 				}
 			}
 			break;
@@ -382,16 +406,14 @@ public class MssgUPD {
 			fis.read(buffer);
 			String idm = Annexe.newIdentifiant();
 			int size = buffer.length;
-			String taille = Annexe.remplirZero(size,3);
-			message += idm + mssgSuite + i + " " + taille + " " + new String(buffer); // LITTLE
-																								// ENDIAN
-																								// A
-																								// METTRE
-																								// SUR
-																								// BUFFER
-																								// LENGTH
-																								// taille 8 000
-			sendAnneau(message, entite, idm);
+			String taille = Annexe.remplirZero(size, 3);
+
+			// message += idm + mssgSuite + i + " " + taille + " " + new
+			// String(buffer);
+			message += idm + mssgSuite + Annexe.toLittleEndian(i + "") + " " + taille + " " + new String(buffer);
+			// little endian
+
+			sendAnneau(message, entite, idm, false);
 			ou += buffer.length;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -399,12 +421,20 @@ public class MssgUPD {
 		return ou;
 	}
 
-	private static void sendAnneau(String message, Entite entite, String idm) {
+	private static void sendAnneau(String message, Entite entite, String idm, boolean fichier) {
 		sendUDP(message, entite, idm, 1);
-		entite.getMssgTransmisAnneau1().add(new Mssg(idm));
+		if (fichier == false) {
+			entite.getMssgTransmisAnneau1().add(new Mssg(idm));
+		} else {
+			entite.getMssgTransmisAnneau1().add(new MssgApplDemande(idm, message));
+		}
 		if (entite.getIsDuplicateur() == true) {
 			sendUDP(message, entite, idm, 2);
-			entite.getMssgTransmisAnneau2().add(new Mssg(idm));
+			if (fichier == false) {
+				entite.getMssgTransmisAnneau2().add(new Mssg(idm));
+			} else {
+				entite.getMssgTransmisAnneau2().add(new MssgApplDemande(idm, message));
+			}
 		}
 	}
 

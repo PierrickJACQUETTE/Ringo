@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
 
@@ -65,11 +66,11 @@ public class Annexe {
 		}
 		return false;
 	}
-	
-	protected static  String remplirZero(int size, int sizeVoulu){
+
+	protected static String remplirZero(int size, int sizeVoulu) {
 		String taille = "" + size;
 		taille = Annexe.addZero(taille, 16);
-		taille = taille.substring(taille.length()-sizeVoulu, taille.length());
+		taille = taille.substring(taille.length() - sizeVoulu, taille.length());
 		return taille;
 	}
 
@@ -79,10 +80,6 @@ public class Annexe {
 			res += "0";
 		}
 		return res + str;
-	}
-
-	protected static String newIdentifiant() {
-		return new String("" + System.nanoTime());
 	}
 
 	protected static String removeWhite(String tmp) {
@@ -216,12 +213,11 @@ public class Annexe {
 		return Integer.parseInt(str);
 	}
 
-	protected static int sizeBuffApplSend(){
+	protected static int sizeBuffApplSend() {
 		// APPL_8_TRANS###_SEN_8_8_3_ => 4+9+9+4+9+9+5 => 49
 		return Main.SIZEMESSG - 49;
 	}
 
-	
 	protected static int nbrMssgApplTrans(String name) {
 		File fileIn = new File(name);
 		FileInputStream fis;
@@ -238,14 +234,39 @@ public class Annexe {
 		return res;
 	}
 
-	private static String identifiantEntite(Entite entite) {
-		String str = Annexe.serveur(trouveAdress(false));
-		String tmp = "";
-		String[] part = str.split("\\.");
-		for (String s : part) {
-			tmp += s;
+	protected static String toLittleEndian(String str) {
+		Long i = Long.parseLong(str);
+		String res = null;
+		try {
+			ByteBuffer bb = ByteBuffer.allocate(8);
+			bb.order(ByteOrder.LITTLE_ENDIAN);
+			bb.putLong(i);
+			byte[] result = bb.array();
+			res = new String(result, "ISO-8859-1");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
-		tmp += entite.getPortTCPIn();
+		return res;
+	}
+
+	protected static String littleEndianTo(String str) {
+		String res = null;
+		try {
+			byte[] tmp;
+			tmp = str.getBytes("ISO-8859-1");
+			ByteBuffer wrapped = ByteBuffer.wrap(tmp).order(ByteOrder.LITTLE_ENDIAN);
+			res = "" + wrapped.getLong();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
+
+	protected static String newIdentifiant() {
+		return length8(new String("" + System.nanoTime()));
+	}
+
+	private static String length8(String tmp) {
 		int coupure = 8;
 		int debut;
 		int suite = 0;
@@ -255,7 +276,7 @@ public class Annexe {
 		} else {
 			debut = Integer.parseInt(tmp);
 		}
-		str = base(debut);
+		String str = base(debut);
 		str += base(suite);
 
 		if (str.length() > coupure) {
@@ -266,6 +287,18 @@ public class Annexe {
 			}
 		}
 		return str;
+	}
+
+	private static String identifiantEntite(Entite entite) {
+		String str = Annexe.serveur(trouveAdress(false));
+		String tmp = "";
+		String[] part = str.split("\\.");
+		for (String s : part) {
+			tmp += s;
+		}
+		tmp += entite.getPortTCPIn();
+
+		return length8(tmp);
 	}
 
 	private static boolean testPortInUDP(int port) {

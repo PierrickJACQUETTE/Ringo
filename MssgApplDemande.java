@@ -44,7 +44,7 @@ public class MssgApplDemande extends Mssg {
 	public void addContenu(String contenu) {
 		this.contenu.append(contenu);
 	}
-	
+
 	public String getMssgReq() {
 		return mssgReq;
 	}
@@ -60,22 +60,22 @@ public class MssgApplDemande extends Mssg {
 	public void setIdTrans(String idTrans) {
 		this.idTrans = idTrans;
 	}
-	
-    protected static boolean my_contains(ArrayList<MssgApplDemande> aL,String idTrans){
-        for(int i=0;i<aL.size();i++){
-            if(aL.get(i).getIdTrans().equals(idTrans)){
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    protected static int position(ArrayList<MssgApplDemande> aL,String idTrans){
-   	 for(int i=0;i<aL.size();i++){
-   		 if(aL.get(i).getIdTrans().equals(idTrans)){
-   			 return i;
-   		 }
-   	 }
-   	 return -1;
-   }
+
+	protected static boolean my_contains(ArrayList<MssgApplDemande> aL, String idTrans) {
+		for (int i = 0; i < aL.size(); i++) {
+			if (aL.get(i).getIdTrans().equals(idTrans)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected static int position(ArrayList<MssgApplDemande> aL, String idTrans) {
+		for (int i = 0; i < aL.size(); i++) {
+			if (aL.get(i).getIdTrans().equals(idTrans)) {
+				return i;
+			}
+		}
+		return -1;
+	}
 }

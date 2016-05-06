@@ -54,7 +54,7 @@ public class Entite implements Runnable {
 		System.out.println("Si cest un dupp et deja recu EYBE ? " + this.alreadyReceivedEYBG);
 		System.out.println();
 	}
-	
+
 	private void printMssgAnneau(ArrayList<? extends Mssg> arl) {
 		for (int i = 0; i < arl.size(); i++) {
 			System.out.println(i + " : " + arl.get(i).getIdm());
@@ -69,7 +69,7 @@ public class Entite implements Runnable {
 		System.out.println("Sur l'anneau 2 : ");
 		printMssgAnneau(this.mssgTransmisAnnneau2);
 		System.out.println();
-		
+
 		System.out.println("Les demandes de fichiers sont : ");
 		printMssgAnneau(this.getDemandeFichier());
 	}
@@ -265,19 +265,21 @@ public class Entite implements Runnable {
 		}
 	}
 
-	private Mssg trans(String idm, String message, int anneau){
+	private Mssg trans(String idm, String message, int anneau) {
 		Mssg m = new Mssg(idm);
-		String parts [] = message.split(" ");
-		if(anneau == 1 && parts[3].equals("REQ")) {
-			m = new MssgApplDemande(parts[5], message);
-			this.getDemandeFichier().add((MssgApplDemande) m);
-			m= new MssgApplDemande(idm, message);
+		String parts[] = message.split(" ");
+		if (parts.length > 3) {
+			if (anneau == 1 && parts[3].equals("REQ")) {
+				m = new MssgApplDemande(parts[5], message);
+				this.getDemandeFichier().add((MssgApplDemande) m);
+				m = new MssgApplDemande(idm, message);
+			}
 		}
 		if (parts[0].equals("TEST")) {
 			m = new MssgTransmisTest(idm, true, System.nanoTime());
 		}
 		return m;
-		
+
 	}
 
 	private void envoi(String tmp, String tmp2, String[] suite, boolean isPossible) {
@@ -308,12 +310,12 @@ public class Entite implements Runnable {
 					message += "# ";
 					tmpAPPL = tmpAPPL.substring(10, tmpAPPL.length());
 					int size = tmpAPPL.length();
-					String taille = Annexe.remplirZero(size,3);
+					String taille = Annexe.remplirZero(size, 3);
 					message += taille + " " + tmpAPPL;
 				} else if (suite[1].equals("TRANS")) {
 					message += " REQ ";
 					int size = suite[2].length();
-					String taille = Annexe.remplirZero(size,2);
+					String taille = Annexe.remplirZero(size, 2);
 					message += taille + " " + suite[2];
 				}
 			}
@@ -324,7 +326,7 @@ public class Entite implements Runnable {
 				MssgUPD.analyseMssg(message, false);
 			}
 			MssgUPD.sendUDP(message, this, idm, i);
-			return trans(idm, message,i);
+			return trans(idm, message, i);
 		} catch (LengthException e) {
 			e.getMessage();
 		} catch (MssgSpellCheck e) {
