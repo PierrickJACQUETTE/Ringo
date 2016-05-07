@@ -28,23 +28,35 @@
 	\tableofcontents	
 \end{frame}
 
-\section{Une entité}
+\section{Entité}
+\begin{frame}
+	\begin{center}
+		{\Huge Une entité}
+	\end{center}
+\end{frame}
 \begin{frame}{Une entité}
 	 \textbf{Les caractéristiques d'une entité}
 	 \begin{itemize}
-		 \item<2-10> Un identifiant (8 caractères et unique)
- 		 \item<3-10> Une chaîne de caractères pour le port de reception en UDP (< 9999)
-		 \item<4-10> Une chaîne de caractères pour le port d'envoi en UDP (< 9999)
-		 \item<5-10> Une chaîne de caractères pour l'adresse IP où l'on envoi
-		 \item<6-10> Une chaîne de caractères pour le port TCP
-		 \item<7-10> Un tableau de chaîne de caractères pour l'adresse IPV4 multi-diffusion (panne du réseau)
-		 \item<8-10> Un tableau de chaîne de caractères pour le port de multi-diffusion (< 9999) 
-		 \item<9-10> Un boolean pour savoir si c'est un duplicateur
-		 \item<10-10> Un tableau de liste de chaîne de caractères de l'identifiant du message transmis
+		 \item<2-12> Un identifiant (8 caractères et unique)
+ 		 \item<3-12> Une chaîne de caractères pour le port In UDP (< 9999)
+		 \item<4-12> Un tableau de chaîne de caractères pour le port Out UDP (< 9999)
+		 \item<5-12> Un tableau de chaîne de caractères pour l'adresse Out
+		 \item<6-12> Une chaîne de caractères pour le port TCP In
+		 \item<7-12> Une chaîne de caractères pour le port TCP Out
+		 \item<8-12> Un tableau de chaîne de caractères pour l'adresse IPV4 multi-diffusion (panne du réseau)
+		 \item<9-12> Un tableau de chaîne de caractères pour le port de multi-diffusion (< 9999) 
+		 \item<10-12> Un boolean pour savoir si c'est un duplicateur
+		 \item<11-12> Une liste de chaîne de caractères de l'identifiant du message transmis
+		 \item<12-12> Une liste de chaîne de caractères du nom d'un fichier
 	\end{itemize}
 \end{frame}
 
-\section{Les ports}
+\section{Ports}
+\begin{frame}
+	\begin{center}
+		{\Huge L'utilisation des différents ports}
+	\end{center}
+\end{frame}
 \begin{frame}{L'utilisation des différents ports}
 	 \begin{itemize}
 		 \item<1-2> \textbf{UDP} écoute et transmet les messages
@@ -52,7 +64,14 @@
 	\end{itemize}
 \end{frame}
 
-\section{Les conventions}
+
+\section{Conventions}
+\begin{frame}
+	\begin{center}
+		{\Huge Les conventions}
+	\end{center}
+\end{frame}
+
 \begin{frame}{Les conventions}
 	 \begin{itemize}
 		 \item<1-5> La syntaxe des messages
@@ -63,7 +82,13 @@
 	\end{itemize}
 \end{frame}
 
-\section{La spécification}
+\section{Spécification}
+\begin{frame}
+	\begin{center}
+		{\Huge La spécification des messages}
+	\end{center}
+\end{frame}
+
 \begin{frame}{La spécification des messages}
 	 \begin{itemize}
 		 \item<1-11> Les 4 premiers octets : \textbf{WELC, NEWC, ACKC, APPL, WHOS, MEMB, GBYE, EYBG, TEST, DOWN, DUPL, ACKD}
@@ -82,32 +107,44 @@
 	}
 \end{frame}
 
-\section{Les messages}
+\section{Messages}
+\begin{frame}
+	\begin{center}
+		{\Huge Les différents types de messages}
+	\end{center}
+\end{frame}
+
 \begin{frame}{Les différents types de messages}
-	\textbf{Les messages d'application}
+	\textbf{Les messages du protocole : }
 	\begin{itemize}
-		 \item<2-9> APPL idm id-app message-app
+		 \item<2-9> \textbf{Insertion :} WELC ip port ip-diff port-diff \escape{n}
+ 		 \item<3-9> \textbf{Qui :} WHOS idm
+		 \item<4-9> \textbf{Suppression entité :} GBYE idm ip port ip-succ port-succ
+		 \item<5-9> \textbf{Tester un anneau :} TEST idm ip-diff port-diff
+		 \item<6-9> \textbf{Duplication :}  DUPL ip port ip-diff port-diff \escape{n}
+		 \item<7-9> \textbf{Suppression des messages :}  SUPP idm idmA
 	\end{itemize}
-	\textbf{Les messages du protocole}
+	\textbf{Les messages d'application : }
 	\begin{itemize}
-		 \item<3-9> \textbf{L'insertion :} WELC ip port ip-diff port-diff \escape{n}
- 		 \item<4-9> \textbf{Qui :} WHOS idm
-		 \item<5-9> \textbf{Suppression :} GBYE idm ip port ip-succ port-succ
-		 \item<6-9> \textbf{Tester un anneau :} TEST idm ip-diff port-diff
-%		 \item<7-9> \textbf{} 
-%		 \item<8-9> \textbf{} 
-%		 \item<9-9> \textbf{} 
+ 		 \item<8-9> \textbf{Diffusion de messages :} APPL idm DIFF\#\#\#\# size-mess mess
+ 		 \item<9-9> \textbf{Transfert de fichiers :} APPL idm TRANS\#\#\# REQ size-nom nom-fichier
 	\end{itemize}
+	
 \end{frame}
 
-
-\begin{frame}{Les applications}
-	\begin{itemize}
-		 \item<1-2> \textbf{Diffusion de messages à tout le monde :} APPL idm DIFF\#\#\#\# size-mess mess
- 		 \item<2-2> \textbf{Transfert de fichiers :} A COMPLETER
-	\end{itemize}
+\subsection{Messages protocolaires}
+\begin{frame}
+	\begin{center}
+		{\Huge Les messages protocolaires}
+	\end{center}
 \end{frame}
 
+\subsubsection{Insertion}
+\begin{frame}
+	\begin{center}
+		{\Huge L'insertion}
+	\end{center}
+\end{frame}
 \begin{frame}{L'insertion}
 	\begin{tikzpicture}
 			\node[draw] (E1) at (-3,0) {Entité 1};
@@ -121,7 +158,7 @@
 				\draw[->,>=latex] (E1) -- (E2);
 			}
 			\visible<2>{
-				\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{connect} (N);
+				\draw[->,>=latex] (N) to[bend right] node[sloped,midway,above]{connect} (E1);
 			}
 			\visible<3>{
 				\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{WELC} (N);
@@ -151,51 +188,457 @@
 	\end{itemize}
 \end{frame}
 
+\subsubsection{Qui est là ?}
+\begin{frame}
+	\begin{center}
+		{\Huge Qui est là ?}
+	\end{center}
+\end{frame}
+
 \begin{frame}{Qui est là ?}
+	\begin{tikzpicture}
+			\node[draw] (E1) at (-3,0) {Entité 1};
+			\node[draw] (E2) at (3,0) {Entité 3};
+			\node[draw] (N) at (0,1) {Entité 2};
+			\visible<1>{
+				\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{WHOS 1 + MEMB 1} (N);
+				\draw[->,>=latex] (E2) to[bend left] (E1);
+				\draw[->,>=latex] (N) to[bend left] (E2);
+			}
+			\visible<2>{
+				\draw[->,>=latex] (E2) to[bend left] (E1);
+				\draw[->,>=latex] (E1) to[bend left] (N);
+				\draw[->,>=latex] (N) to[bend left] node[sloped,midway,above]{WHOS 1 + MEMB 1}  node[sloped,midway,below]{+ MEMB 2} (E2);
+			}
+			\visible<3>{
+				\draw[->,>=latex] (E2) to[bend left] node[sloped,midway,above]{WHOS 1 + MEMB 1} node[sloped,midway,below]{+ MEMB 2 + MEMB 3} (E1);
+				\draw[->,>=latex] (N) to[bend left] (E2);
+				\draw[->,>=latex] (E1) to[bend left] (N);
+			}
+			\visible<4>{
+				\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{MEMB 2 + MEMB 3}(N);
+				\draw[->,>=latex] (E2) to[bend left] (E1);
+				\draw[->,>=latex] (N) to[bend left] (E2);
+			}
+			\visible<5>{
+				\draw[->,>=latex] (E1) to[bend left](N);
+				\draw[->,>=latex] (E2) to[bend left] (E1);
+				\draw[->,>=latex] (N) to[bend left] node[sloped,midway,above] {MEMB 3} (E2);
+			}
+	\end{tikzpicture}
 	\begin{itemize}
 		\item<1-5> Une entité 1 envoi \textbf{WHOS idm}
 		\item<2-5> Les n autres entités reçoivent et renvoi WHOS idm
 		\item<2-5> Elles envoient \textbf{MEMB idm id ip port} son IP et son port d'écoute
-		\item<3-5> Elles reçoivent MEMB idm id ip port et le renvoient
+		\item<2-5> Elles reçoivent MEMB idm id ip port et le renvoient
 		\item<4-5> Quand entité 1 reçoit WHOS idm , envoi son IP et son port d'écoute
-		\item<5-5> Quand chaque entité reçoit MEMB avec son numéro de port et son IP il les affichent
+		\item<2-5> Quand une entité reçoit MEMB son\_num\_port son\_IP => affichent
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Suppression}
-	\begin{multicols}{2}
-   		\visible<1-6>{
-			\begin{tikzpicture}
-				\node[draw] (E1) at (2,0) {Entité 1};
-				\node[draw] (E2) at (5,0) {Entité 2};
-				\node[draw] (N) at (3.5,1) {A Supprimer};
-				\draw[->,>=latex] (E1) to[bend left] (N);
-				\draw[->,>=latex] (N) to[bend left] (E2);
-				\draw[->,>=latex] (E2) to[bend left] (E1);
-			\end{tikzpicture}
+\subsubsection{Suppression entité}
+\begin{frame}
+	\begin{center}
+		{\Huge Suppression entité}
+	\end{center}
+\end{frame}
+
+\begin{frame}{Suppression entité}
+	\begin{tikzpicture}
+		\node[draw] (E1) at (-3,0) {Entité 1};
+		\node[draw] (E2) at (3,0) {Entité 3};
+		\node[draw] (N) at (0,1) {A supprimer};
+		\visible<1>{
+			\draw[->,>=latex] (E1) to[bend left] (N);
+			\draw[->,>=latex] (N) to[bend left] node[sloped,midway,above] {GBYE} (E2);
+			\draw[->,>=latex] (E2) to[bend left] (E1);
 		}
-		\visible<2-6>{
-			\begin{tikzpicture}
-				\node[draw] (E1) at (2,0) {Entité 1};
-				\node[draw] (E2) at (5,0) {Entité 2};
-				\draw[->,>=latex] (E1) to[bend left] (E2);
-				\draw[->,>=latex] (E2) to[bend left] (E1);
-			\end{tikzpicture}
+		\visible<2>{
+			\draw[->,>=latex] (E1) to[bend left] (N);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+			\draw[->,>=latex] (E2) to[bend left] node[sloped,midway,above] {GBYE} (E1);
 		}
-	\end{multicols}
+		\visible<3>{
+			\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above] {EYBG}  (N);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+			\draw[->,>=latex] (E1) -- (E2);
+		}
+		\visible<4>{
+			\draw[->,>=latex] (E1) -- (E2);
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+		}
+	\end{tikzpicture}
+
 	\begin{itemize}
-		 \item<3-6> Entité envoi \textbf{GBYE idm ip port ip-succ port-succ} son identité et celle du suivant
-		 \item<4-6> Entités suivantes reçoivent le message et le transmette
-		 \item<4-6> Entité précédente reçoit le message, ne le retransmet pas (on sait que c'est la précédente car l'identité du message correspond à l'identité suivante de l'entité courante
-		 \item<5-6> Ce dernier envoi \textbf{EYBG idm} et modifie ses attributs d'identité suivante avec les nouvelles
-		 \item<6-6> Entité reçoit EYBG id, ne le retransmet pas, peut maintenant être supprimé
+		 \item<1-4> Entité envoi \textbf{GBYE idm ip port ip-succ port-succ} son identité et celle du suivant
+		 \item<2-4> Entités suivantes reçoivent le message et le transmette
+		 \item<3-4> Entité précédente reçoit le message, ne le retransmet pas (on sait que c'est la précédente car l'identité du message correspond à l'identité suivante de l'entité courante
+		 \item<3-4> Ce dernier envoi \textbf{EYBG idm} et modifie ses attributs d'identité suivante avec les nouvelles
+		 \item<4-4> Entité reçoit EYBG id, ne le retransmet pas, peut maintenant être supprimé
 	\end{itemize}
+\end{frame}
+
+\subsubsection{Tester un anneau}
+\begin{frame}
+	\begin{center}
+		{\Huge Tester un anneau}
+	\end{center}
 \end{frame}
 
 \begin{frame}{Tester un anneau}
+	\begin{tikzpicture}
+		\node[draw] (E1) at (-3,0) {Entité 1};
+		\node[draw] (E2) at (3,0) {Entité 3};
+		\node[draw] (N) at (0,1) {Entité 2};
+		\visible<1>{
+			\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above] {TEST} (N);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+		}
+		\visible<2>{
+			\draw[->,>=latex] (E1) to[bend left] (N);
+			\draw[->,>=latex] (N) to[bend left] node[sloped,midway,above] {TEST} (E2);
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+		}
+		\visible<3>{
+			\draw[->,>=latex] (E1) to[bend left] (N);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+			\draw[->,>=latex] (E2) to[bend left] node[sloped,midway,above] {TEST} (E1);
+		}
+		\visible<4>{
+			\draw[->,>=latex] (E1) to[bend left](N);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+			
+			\draw[->,>=latex,red] (E1) -- node[sloped,midway,above] {DOWN} (N);
+			\draw[->,>=latex,red] (E1) -- node[sloped,midway,above] {DOWN} (E2);
+			\draw[->,>=latex,red] (E1.north west) to [loop] node[sloped,midway,above] {DOWN} (E1);
+
+		}
+	\end{tikzpicture}
 	\begin{itemize}
-		\item
-		\item
+		\item<1-4> Entité 1 envoi \textbf{TEST idm ip-diff port-diff} son adresse Multi-diff
+		\item<2-4> Quand une entité reçoit ce message elle le retransmet
+		\item<3-4> Quand l'entité 1 reçoit le message alors l'anneau est correct
+		\item<4-4> Si l'entité 1 ne reçoit pas le message au bout de n secondes, elle envoi un message \textbf{DOWN} sur son adresse de multi diffusion
+		\item<4-4> Si une entité reçoit DOWN sur son adresse de multi diffusion, elle se termine
+	\end{itemize}
+\end{frame}
+
+\subsubsection{Duplication}
+\begin{frame}
+	\begin{center}
+		{\Huge La duplication}
+	\end{center}
+\end{frame}
+
+\begin{frame}{La duplication :}
+	\begin{tikzpicture}
+			\node[draw] (E1) at (-3,0) {Entité 1};
+			\node[draw] (D) at (2,0) {A dupliquer};
+			\node[draw] (E2) at (-0.5,1) {Entité 2};
+			\node[draw] (E4) at (5.8,0) {Entité 4};
+			\visible<1-4>{
+				\draw[->,>=latex] (E4.north east) to [loop] (E4);
+			}
+			\visible<1>{
+				\draw[->,>=latex] (E4) -- node[sloped,midway,above]{connect} (D);
+			}
+			\visible<2>{
+				\draw[->,>=latex] (D) -- node[sloped,midway,above]{WELC} (E4);
+			}
+			\visible<3>{
+				\draw[->,>=latex] (E4) -- node[sloped,midway,above]{DUPL} (D);
+			}
+			\visible<4>{
+				\draw[->,>=latex] (D) -- node[sloped,midway,above]{ACKD} (E4);
+			}
+			\visible<5-6>{
+			 	\draw[->,>=latex] (E4) to[bend right] (D);
+			}
+			\visible<6>{
+				\draw[->,>=latex] (D) to[bend right] (E4);
+
+			}
+			\draw[->,>=latex] (E1) to[bend left](E2);
+			\draw[->,>=latex] (D) to[bend left] (E1);
+			\draw[->,>=latex] (E2) to[bend left] (D);
+
+	\end{tikzpicture}
+	\begin{itemize}
+		\item<1-6> Entité 4 se connecte à Entité 3
+		\item<2-6> Entité 4 envoi \textbf{WELC ip port ip-diff port-diff \escape{n}} (adresse et port de l’entité 2, adresse et port de multi-diffusion)
+		\item<2-6> Nouveau reçoit WELC ip port ip-diff port-diff \escape{n}, stocke
+		\item<3-6> Nouveau envoi \textbf{DUPL ip port ip-diff port-diff\escape{n}} (information qu'il connaît dans ses attributs)
+		\item<3-6> Entité 4 reçoit DUPL ip port ip-diff port-diff\escape{n}, stocke
+		\item<4-6> Entité 4 envoi \textbf{ACKD port\escape{n}}
+		\item<5-6> Entité 4 ferme la connexion
+		\item<4-6> Nouveau reçoit ACKD port \escape{n}, stocke port
+	\end{itemize}
+\end{frame}
+
+\subsubsection{Suppression messages}
+\begin{frame}
+	\begin{center}
+		{\Huge La suppression des messages}
+	\end{center}
+\end{frame}
+
+\begin{frame}{La suppression des messages :}
+\framesubtitle{Algorithme et explication de comment on supprime pour éviter l'accumulation dans la liste et allongement du temps de recherche}
+\begin{multicols}{2}
+	\begin{tikzpicture}
+		\node[draw=none,dashed,text width=2cm, text centered] (DT) at (-1,3.35) {};
+		\node[draw=none] (H) at (-1,4.5) {};
+		\visible<1->{
+			\draw[->,>=latex] (H) -- node[left] {Recoi X}  node[right]{sauf SUPP} (DT);
+		}
+		\visible<2->{
+			\node[draw,dashed,text width=2cm, text centered] (DT) at (-1,3) {Deja transmis};
+		}
+		\visible<3->{
+			\node[draw, text width=2cm, text centered] (TM) at (0.2,1) {Transfert Message};
+			\draw[->,>=latex] (DT) -- node[right] {False} (TM);
+		}
+		\visible<4->{
+			\node[draw,dashed,text width=2cm, text centered] (D) at (-2.5,1) {Dupplicateur};
+			\draw[->,>=latex] (DT) -- node[left] {True} (D);
+		}
+		\visible<5->{
+			\node[draw, text width=2cm, text centered] (TCS) at (-1.3,-2) {Remove + Cree SUPP};
+			\draw[->,>=latex] (D) -- node[right] {False} (TCS);
+		}
+		\visible<6->{
+			\node[draw, text centered] (R) at (-3,-2) {Rien};
+			\draw[->,>=latex] (D) -- node[left] {True} (R);
+		}
+		\draw (1.5,4.5) -- (1.5,-2.5);		
+	\end{tikzpicture}
+	
+	\begin{tikzpicture}
+		\visible<7->{
+			\draw[->,>=latex] (H) -- node[left] {Recoi }  node[right]{SUPP} (DT);
+		}
+		\visible<8->{
+			\node[draw,dashed,text width=2cm, text centered] (DT) at (-1,3) {Deja transmis};
+		}
+		\visible<9->{
+			\node[draw, text centered] (TM) at (0.2,1) {Rien};
+			\draw[->,>=latex] (DT) -- node[right] {False} (TM);
+		}
+		\visible<10->{
+			\node[draw,dashed,text width=2cm, text centered] (D) at (-2.5,1) {Dupplicateur};
+			\draw[->,>=latex] (DT) -- node[left] {True} (D);
+		}
+		\visible<11->{
+			\node[draw, text width=1.5cm, text centered] (TCS) at (-0.9,-1.6) {Remove idmA + Transfert SUPP};
+			\draw[->,>=latex] (D) -- node[right] {False} (TCS);
+		}
+		\visible<12>{
+			\node[draw, text width=2cm, text centered] (R) at (-3,-2) {Transfert Message};
+			\draw[->,>=latex] (D) -- node[left] {True} (R);
+		}
+	\end{tikzpicture}
+ \end{multicols}
+\end{frame}
+
+\begin{frame}{La suppression des messages :}
+\framesubtitle{Un exemple}
+	\begin{tikzpicture}
+		\visible<1>{
+			\node[draw, text width=2.2cm, text centered] (E1) at (-3,0) {Entité 1 Transmis : 11};
+		}
+		\visible<1-2>{
+			\node[draw, text width=2.2cm, text centered] (E2) at (-0.5,1.5) {Entité 2 Transmis : 11};
+		}
+		\node[draw, text width=2.2cm, text centered] (E3) at (2,0) {Entité 3 Transmis : 11};
+		\visible<1-4>{
+			\node[draw, text width=2.2cm, text centered] (E4) at (5,0) {Entité 4 Transmis : 11};
+		}
+		\visible<1>{
+			\draw[->,>=latex] (E1) to[bend left] (E2);
+			\draw[->,>=latex] (E2) to[bend left] (E3);
+			\draw[->,>=latex] (E3) to[bend left] node[sloped,midway,above]{X 11} (E1);
+			\draw[->,>=latex] (E3) to[bend right] (E4);
+			\draw[->,>=latex] (E4) to[bend right] (E3);
+		}
+		\visible<2-7>{
+			\node[draw, text width=2.2cm, text centered] (E1) at (-3,0) {Entité 1};
+		}
+		\visible<2>{
+			\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{SUPP} (E2);
+			\draw[->,>=latex] (E2) to[bend left] (E3);
+			\draw[->,>=latex] (E3) to[bend left] (E1);
+			\draw[->,>=latex] (E3) to[bend right] (E4);
+			\draw[->,>=latex] (E4) to[bend right] (E3);
+		}
+		\visible<3-7>{
+			\node[draw, text width=2.2cm, text centered] (E2) at (-0.5,1.5) {Entité 2};
+		}
+		\visible<3>{
+			\draw[->,>=latex] (E1) to[bend left] (E2);
+			\draw[->,>=latex] (E2) to[bend left] node[sloped,midway,above]{SUPP} (E3);
+			\draw[->,>=latex] (E3) to[bend left] (E1);
+			\draw[->,>=latex] (E3) to[bend right] (E4);
+			\draw[->,>=latex] (E4) to[bend right] (E3);
+		}
+		\visible<4>{
+			\draw[->,>=latex] (E1) to[bend left] (E2);
+			\draw[->,>=latex] (E2) to[bend left] (E3);
+			\draw[->,>=latex] (E3) to[bend left] node[sloped,midway,above]{SUPP} (E1);
+			\draw[->,>=latex] (E3) to[bend right] node[sloped,midway,below]{SUPP} (E4);
+			\draw[->,>=latex] (E4) to[bend right] (E3);
+		}
+		\visible<5-7>{
+			\node[draw, text width=2.2cm, text centered] (E4) at (5,0) {Entité 4 };
+		}
+		\visible<5>{
+			\draw[->,>=latex] (E1) to[bend left]  node[sloped,midway,above]{rien}(E2);
+			\draw[->,>=latex] (E2) to[bend left] (E3);
+			\draw[->,>=latex] (E3) to[bend left] (E1);
+			\draw[->,>=latex] (E3) to[bend right] (E4);
+			\draw[->,>=latex] (E4) to[bend right] node[sloped,midway,above]{SUPP} (E3);
+		}
+		\visible<6>{
+			\draw[->,>=latex] (E1) to[bend left] (E2);
+			\draw[->,>=latex] (E2) to[bend left] (E3);
+			\draw[->,>=latex] (E3) to[bend left] node[sloped,midway,above]{SUPP} (E1);
+			\draw[->,>=latex] (E3) to[bend right] node[sloped,midway,below]{SUPP} (E4);
+			\draw[->,>=latex] (E4) to[bend right] (E3);
+		}
+		\visible<7>{
+			\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{rien}(E2);
+			\draw[->,>=latex] (E2) to[bend left] (E3);
+			\draw[->,>=latex] (E3) to[bend left] (E1);
+			\draw[->,>=latex] (E3) to[bend right] (E4);
+			\draw[->,>=latex] (E4) to[bend right] node[sloped,midway,above]{rien} (E3);
+		}
+	\end{tikzpicture}
+	\begin{itemize}
+		\item<1-7> Entité 1 reçoit un message qu'elle a déjà envoyé
+		\item<2-7> Entité 1 non dupl, supprime idmA, envoi SUPP
+		\item<3-7> Entité 2 non dupl reçoit SUPP, contient puis supprime idmA, transmet SUPP
+		\item<4-7> Entité 3 dupl reçoit SUPP, contient idmA, transmet SUPP
+		\item<5-7> E1 reçoit SUPP, non contenu ne transmet pas et E4 -> E2
+		\item<6-7> Entité 3 => Entité 3 
+		\item<7-7> Entité 1 et 4 => Entité 1
+	\end{itemize}
+\end{frame}
+
+\subsection{Messages d'application}
+\begin{frame}
+	\begin{center}
+		{\Huge Messages d'application}
+	\end{center}
+\end{frame}
+
+\subsubsection{Diffusion}
+\begin{frame}
+	\begin{center}
+		{\Huge Diffusion de messages à tout le monde}
+	\end{center}
+\end{frame}
+
+\begin{frame}{Diffusion de messages à tout le monde :}
+	\begin{tikzpicture}
+		\node[draw] (E1) at (-3,0) {Entité 1};
+		\node[draw] (E2) at (3,0) {Entité 3};
+		\node[draw] (N) at (0,1) {Entité 2};
+		\visible<1>{
+			\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{DIFF} (N);
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+		}
+		\visible<2>{
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+			\draw[->,>=latex] (E1) to[bend left] (N);
+			\draw[->,>=latex] (N) to[bend left] node[sloped,midway,above]{DIFF} (E2);
+		}
+		\visible<3>{
+			\draw[->,>=latex] (E2) to[bend left] node[sloped,midway,above]{DIFF} (E1);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+			\draw[->,>=latex] (E1) to[bend left] (N);
+		}
+	\end{tikzpicture}
+	\begin{itemize}
+		 \item<1-3> Entité 1 envoi \textbf{APPL idm DIFF\#\#\#\# size-mess mess}
+		 \item<2-3> Quand un entité reçoit DIFF, elle le retransmet
+		 \item<3-3> Quand entité 1 reçoit DIFF elle ne le retransmet pas
+	\end{itemize}
+\end{frame}
+
+\subsubsection{Transfert}
+\begin{frame}
+	\begin{center}
+		{\Huge Transfert de fichiers}
+	\end{center}
+\end{frame}
+
+\begin{frame}{Transfert de fichiers :}
+	\framesubtitle{Cas où le fichier n'est pas présent}
+	\begin{tikzpicture}
+		\node[draw] (E1) at (-3,0) {Entité 1};
+		\node[draw] (E2) at (3,0) {Entité 3};
+		\node[draw] (N) at (0,1) {Entité 2};
+		\visible<1>{
+			\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{TRANS} (N);
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+		}
+		\visible<2>{
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+			\draw[->,>=latex] (E1) to[bend left] (N);
+			\draw[->,>=latex] (N) to[bend left] node[sloped,midway,above]{TRANS} (E2);
+		}
+		\visible<3>{
+			\draw[->,>=latex] (E2) to[bend left] node[sloped,midway,above]{TRANS}  (E1);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+			\draw[->,>=latex] (E1) to[bend left] (N);
+		}
+	\end{tikzpicture}
+	\begin{itemize}
+		\item<1-3> Une entité 1 envoi \textbf{TRANS}
+		\item<2-3> Une entité reçoit TRANS si elle n'a pas le fichier dans son répertoire courant, elle retransmet
+		\item<3-3> Entité 1 reçoit TRANS alors elle sait que personne a le fichier
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Transfert de fichiers :}
+	\framesubtitle{Cas où le fichier est présent}
+	\begin{tikzpicture}
+		\node[draw] (E1) at (-3,0) {Entité 1};
+		\node[draw] (E2) at (3,0) {Entité 3};
+		\node[draw] (N) at (0,1) {Entité 2};
+		\visible<1>{
+			\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above]{TRANS} (N);
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+		}
+		\visible<2>{
+			\draw[->,>=latex] (E1) to[bend left] (N);
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+			\draw[->,>=latex] (N) to[bend left] node[sloped,midway,above]{ROK + SEN} (E2);
+		}
+		\visible<3>{
+			\draw[->,>=latex] (E1) to[bend left](N);
+			\draw[->,>=latex] (E2) to[bend left] node[sloped,midway,above] {ROK + SEN} (E1);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+		}
+		
+		\visible<4>{
+			\draw[->,>=latex] (E1) to[bend left] node[sloped,midway,above] {BEUG => REQ}(N);
+			\draw[->,>=latex] (E2) to[bend left] (E1);
+			\draw[->,>=latex] (N) to[bend left] (E2);
+		}
+	\end{tikzpicture}
+	\begin{itemize}
+		\item<1-4> Une entité 1 envoi \textbf{TRANS}
+		\item<2-4> Entité ayant file recevant TRANS => ne renvoi pas REQ
+		\item<2-4> Elle envoi d'abord \textbf{APPL idm TRANS\#\#\# ROK id-trans size-nom nom-fichier nummess}
+		\item<2-4> Puis elle envoi n \textbf{APPL idm TRANS\#\#\# SEN id-trans no-mess size-content content}
+		\item<3-4> Entité voulant pas file recevant SEN ou ROK renvoi mssg
+		\item<4-4> Entité 1 reçoit SEN et ROK crée le file, si les messages ne sont pas reçus dans l'ordre, renvoi demande du file
 	\end{itemize}
 \end{frame}
 
