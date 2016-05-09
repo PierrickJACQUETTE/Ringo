@@ -321,11 +321,11 @@ public class Entite implements Runnable {
 			}
 			if (isPossible == true) {
 				MssgUPD.membPrint(message.split(" "));
-				MssgUPD.analyseMssg(message, true);
+				MssgUPD.analyseMssg(message, message.getBytes(), true);
 			} else {
-				MssgUPD.analyseMssg(message, false);
+				MssgUPD.analyseMssg(message, message.getBytes(), false);
 			}
-			MssgUPD.sendUDP(message, this, idm, i);
+			MssgUPD.sendUDP(message.getBytes(), this, idm, i);
 			return trans(idm, message, i);
 		} catch (LengthException e) {
 			e.getMessage();

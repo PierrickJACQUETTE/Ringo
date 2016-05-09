@@ -1,3 +1,4 @@
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,7 +29,7 @@ public class MssgUPD {
 			} else {
 				st = st.trim();
 			}
-			analyseMssg(st, true);
+			analyseMssg(st, buff.array(), true);
 			String parts[] = st.split(" ");
 			if (parts[0].equals("WHOS")) {
 				mssgWHO(st, parts, entite);
@@ -43,7 +44,7 @@ public class MssgUPD {
 			} else if (parts[0].equals("SUPP")) {
 				mssgSUPP(st, parts, entite);
 			} else if (parts[0].equals("APPL")) {
-				mssgAPPL(st, parts, entite);
+				mssgAPPL(buff.array(), parts, entite);
 			}
 
 		} catch (LengthException | MssgSpellCheck e) {
@@ -86,18 +87,18 @@ public class MssgUPD {
 				sendSUPP(entite, idm);
 			}
 		} else {
-			sendUDP(message, entite, idm, 1);
+			sendUDP(message.getBytes(), entite, idm, 1);
 			entite.getMssgTransmisAnneau1().add(new Mssg(idm));
-			sendUDP(message2, entite, idmM, 1);
+			sendUDP(message2.getBytes(), entite, idmM, 1);
 			entite.getMssgTransmisAnneau1().add(new Mssg(idmM));
 			membPrint(message2.split(" "));
 		}
 		if (entite.getIsDuplicateur() == true) {
 			if (m.my_contains(entite.getMssgTransmisAnneau2())) {
 			} else {
-				sendUDP(message, entite, idm, 2);
+				sendUDP(message.getBytes(), entite, idm, 2);
 				entite.getMssgTransmisAnneau2().add(new Mssg(idm));
-				sendUDP(message2, entite, idmM, 2);
+				sendUDP(message2.getBytes(), entite, idmM, 2);
 				entite.getMssgTransmisAnneau2().add(new Mssg(idmM));
 			}
 		}
@@ -119,13 +120,13 @@ public class MssgUPD {
 			}
 		} else {
 			membPrint(parts);
-			sendUDP(message, entite, idm, 1);
+			sendUDP(message.getBytes(), entite, idm, 1);
 			entite.getMssgTransmisAnneau1().add(new Mssg(idm));
 		}
 		if (entite.getIsDuplicateur() == true) {
 			if (m.my_contains(entite.getMssgTransmisAnneau2())) {
 			} else {
-				sendUDP(message, entite, idm, 2);
+				sendUDP(message.getBytes(), entite, idm, 2);
 				entite.getMssgTransmisAnneau2().add(new Mssg(idm));
 			}
 		}
@@ -139,7 +140,7 @@ public class MssgUPD {
 		entite.setPortOutUDP(Integer.parseInt(parts[5]), anneau);
 		String idmNew = Annexe.newIdentifiant();
 		String message = "EYBG" + " " + idmNew;
-		sendUDP(message, tmp, parts[1], anneau);
+		sendUDP(message.getBytes(), tmp, parts[1], anneau);
 		if (anneau == 1) {
 			entite.getMssgTransmisAnneau1().add(new Mssg(idmNew));
 		} else if (anneau == 2) {
@@ -160,7 +161,7 @@ public class MssgUPD {
 				&& entite.getPortOutUDP(anneau) == Integer.parseInt(parts[3])) {
 			mssgGBYE(entite, parts, anneau);
 		} else {
-			sendUDP(message, entite, idm, anneau);
+			sendUDP(message.getBytes(), entite, idm, anneau);
 			entite.getMssgTransmisAnneau1().add(new Mssg(idm));
 		}
 		if (entite.getIsDuplicateur() == true) {
@@ -170,7 +171,7 @@ public class MssgUPD {
 					&& entite.getPortOutUDP(anneau) == Integer.parseInt(parts[3])) {
 				mssgGBYE(entite, parts, anneau);
 			} else {
-				sendUDP(message, entite, idm, anneau);
+				sendUDP(message.getBytes(), entite, idm, anneau);
 				entite.getMssgTransmisAnneau2().add(new Mssg(idm));
 			}
 		}
@@ -212,7 +213,7 @@ public class MssgUPD {
 				&& !parts[3].equals(entite.getPortMultiDiff(anneau))) {
 			System.out.println("J'ai recu un message TEST mais ils n'appartient pas a cet anneau");
 		} else {
-			sendUDP(message, entite, idm, anneau);
+			sendUDP(message.getBytes(), entite, idm, anneau);
 			entite.getMssgTransmisAnneau1().add(new Mssg(idm));
 		}
 		if (entite.getIsDuplicateur() == true) {
@@ -229,7 +230,7 @@ public class MssgUPD {
 					&& !parts[3].equals(entite.getPortMultiDiff(anneau))) {
 				System.out.println("J'ai recu un message TEST mais ils n'appartient pas a cet anneau");
 			} else {
-				sendUDP(message, entite, idm, anneau);
+				sendUDP(message.getBytes(), entite, idm, anneau);
 				entite.getMssgTransmisAnneau2().add(new Mssg(idm));
 			}
 		}
@@ -242,23 +243,23 @@ public class MssgUPD {
 			if (entite.getIsDuplicateur() == false) {
 				removeMssg(idm, entite, 1);
 			}
-			sendUDP(message, entite, idm, 1);
+			sendUDP(message.getBytes(), entite, idm, 1);
 		}
 		if (entite.getIsDuplicateur() == true) {
 			if (m.my_contains(entite.getMssgTransmisAnneau2())) {
-				sendUDP(message, entite, idm, 2);
+				sendUDP(message.getBytes(), entite, idm, 2);
 			}
 		}
 	}
 
-	private static void mssgAPPL(String message, String[] parts, Entite entite) {
+	private static void mssgAPPL(byte[] message, String[] parts, Entite entite) {
 		String idm = parts[1];
 		boolean retransmet = true;
 		if (parts[2].equals("DIFF####")) {
-			String messageDIFF = corpsDuMssgAPPL(parts, 4);
+			String messageDIFF = new String(corpsDuMssgAPPL(message, 4));
 			System.out.println("\nJ'ai recu le mssg APPL est le message est : \n" + messageDIFF + "\n");
 		} else if (parts[2].equals("TRANS###")) {
-			retransmet = mssgAPPLTRANS(parts, entite);
+			retransmet = mssgAPPLTRANS(message, entite);
 		}
 		Mssg m = new Mssg(idm);
 		if (m.my_contains(entite.getMssgTransmisAnneau1())) {
@@ -284,18 +285,21 @@ public class MssgUPD {
 		}
 	}
 
-	private static String corpsDuMssgAPPL(String[] parts, int debut) {
-		String messageDIFF = "";
-		for (int i = debut; i < parts.length; i++) {
-			messageDIFF += parts[i];
-			if (i != parts.length) {
-				messageDIFF += " ";
-			}
+	private static byte[] corpsDuMssgAPPL(byte[] buffer, int debut) {
+		String[] parts = new String(buffer).split(" ");
+		int debutReel = 0;
+		for (int i = 0; i < debut; i++) {
+			debutReel += parts[i].length() + 1;
 		}
-		return messageDIFF;
+		byte[] res = new byte[buffer.length - debutReel];
+		for (int j = 0; j < res.length; j++) {
+			res[j] = buffer[j + debutReel];
+		}
+		return res;
 	}
 
-	private static boolean mssgAPPLTRANS(String[] parts, Entite entite) {
+	private static boolean mssgAPPLTRANS(byte[] buffer, Entite entite) {
+		String[] parts = new String(buffer).trim().split(" ");
 		boolean retransmet = true;
 		switch (parts[3]) {
 
@@ -312,20 +316,21 @@ public class MssgUPD {
 				String idmM = Annexe.newIdentifiant();
 				message += idmM + " " + parts[4] + " " + parts[5] + " " + nbMssg;
 
-				sendAnneau(message, entite, idmM, false);
+				sendAnneau(message.getBytes(), entite, idmM, false);
 				mssgAPPLSEN(idmM, parts[5], entite);
 			}
 			break;
 
 		case "ROK":
+			parts = new String(buffer).split(" ");
 			MssgApplDemande m = new MssgApplDemande(parts[6], "");
 			if (m.my_contains(entite.getDemandeFichier())) {
 				int pos = m.position(entite.getDemandeFichier());
 				entite.getDemandeFichier().get(pos).setIdTrans(parts[4]);
 
 				// entite.getDemandeFichier().get(pos).setNmbDeMssg(Integer.parseInt(parts[7]));
-				String string = Annexe.littleEndianTo(parts[7]); // Litttle
-																	// endian
+				String string = new String(Annexe.littleEndianTo(parts[7])); // Litttle
+				// endian
 
 				entite.getDemandeFichier().get(pos).setNmbDeMssg(Integer.parseInt(string));
 				retransmet = false;
@@ -337,21 +342,20 @@ public class MssgUPD {
 				retransmet = false;
 				int pos = MssgApplDemande.position(entite.getDemandeFichier(), parts[4]);
 				m = entite.getDemandeFichier().get(pos);
-				String string = Annexe.littleEndianTo(parts[5]); // little
-																	// endian;
+				String string = new String(Annexe.littleEndianTo(parts[5])); // little
+				// endian;
 				if (m.getNumeroMssgRecu() + 1 == Integer.parseInt(string)) {
 
 					// m.setNumeroMssgRecu(Integer.parseInt(parts[5));
 
 					m.setNumeroMssgRecu(Integer.parseInt(string));
-
-					m.addContenu(corpsDuMssgAPPL(parts, 7));
+					m.addContenu(corpsDuMssgAPPL(buffer, 7), Integer.parseInt(parts[6]));
 					if (m.getNmbDeMssg() - 1 == m.getNumeroMssgRecu()) {
 						File fileOut = new File(m.getIdm());
 						FileOutputStream fos;
 						try {
 							fos = new FileOutputStream(fileOut);
-							fos.write(m.getContenu().toString().getBytes());
+							fos.write(m.getContenu());
 							fos.close();
 							System.out.println("Le fichier est recupere");
 						} catch (FileNotFoundException e) {
@@ -368,7 +372,7 @@ public class MssgUPD {
 					String decoupeFin = mssgDeDemande.substring(14, mssgDeDemande.length());
 					String idmNew = Annexe.newIdentifiant();
 					String finale = decoupeDebut + " " + idmNew + " " + decoupeFin;
-					sendAnneau(finale, entite, idmNew, true);
+					sendAnneau(finale.getBytes(), entite, idmNew, true);
 				}
 			}
 			break;
@@ -381,7 +385,7 @@ public class MssgUPD {
 		String messageSuite = " TRANS### SEN " + idmM + " ";
 		File fileIn = new File(nameFichier);
 		try {
-			FileInputStream fis = new FileInputStream(fileIn);
+			BufferedInputStream fis = new BufferedInputStream(new FileInputStream(fileIn));
 			byte[] buffer = new byte[Annexe.sizeBuffApplSend()];
 			int total = fis.available();
 			int ou = 0;
@@ -400,7 +404,7 @@ public class MssgUPD {
 
 	}
 
-	private static int sendAPPLTexte(FileInputStream fis, byte[] buffer, String message, String mssgSuite, int ou,
+	private static int sendAPPLTexte(BufferedInputStream fis, byte[] buffer, String message, String mssgSuite, int ou,
 			int i, Entite entite) {
 		try {
 			fis.read(buffer);
@@ -410,10 +414,17 @@ public class MssgUPD {
 
 			// message += idm + mssgSuite + i + " " + taille + " " + new
 			// String(buffer);
-			message += idm + mssgSuite + Annexe.toLittleEndian(i + "") + " " + taille + " " + new String(buffer);
-			// little endian
-
-			sendAnneau(message, entite, idm, false);
+			message += idm + mssgSuite + Annexe.toLittleEndian(i + "") + " " + taille + " ";
+			byte[] tmp = message.getBytes();
+			byte[] mssgFinal = new byte[tmp.length + buffer.length];
+			int i2 = 0;
+			for (; i2 < tmp.length; i2++) {
+				mssgFinal[i2] = tmp[i2];
+			}
+			for (int j = 0; j < buffer.length; j++) {
+				mssgFinal[i2 + j] = buffer[j];
+			}
+			sendAnneau(mssgFinal, entite, idm, false);
 			ou += buffer.length;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -421,33 +432,33 @@ public class MssgUPD {
 		return ou;
 	}
 
-	private static void sendAnneau(String message, Entite entite, String idm, boolean fichier) {
+	private static void sendAnneau(byte[] message, Entite entite, String idm, boolean fichier) {
 		sendUDP(message, entite, idm, 1);
 		if (fichier == false) {
 			entite.getMssgTransmisAnneau1().add(new Mssg(idm));
 		} else {
-			entite.getMssgTransmisAnneau1().add(new MssgApplDemande(idm, message));
+			entite.getMssgTransmisAnneau1().add(new MssgApplDemande(idm, new String(message)));
 		}
 		if (entite.getIsDuplicateur() == true) {
 			sendUDP(message, entite, idm, 2);
 			if (fichier == false) {
 				entite.getMssgTransmisAnneau2().add(new Mssg(idm));
 			} else {
-				entite.getMssgTransmisAnneau2().add(new MssgApplDemande(idm, message));
+				entite.getMssgTransmisAnneau2().add(new MssgApplDemande(idm, new String(message)));
 			}
 		}
 	}
 
-	protected static void sendUDP(String tmp, Entite entite, String idm, int anneau) {
+	protected static void sendUDP(byte[] tmp, Entite entite, String idm, int anneau) {
 		try {
 			DatagramSocket dso = new DatagramSocket();
 			byte[] data;
-			data = tmp.getBytes();
+			data = tmp;
 			InetSocketAddress ia = new InetSocketAddress(entite.getAddrNext(anneau), entite.getPortOutUDP(anneau));
 			DatagramPacket paquet = new DatagramPacket(data, data.length, ia);
 			dso.send(paquet);
 			if (Main.affichage) {
-				System.out.println("Message envoye : " + tmp);
+				System.out.println("Message envoye : " + new String(tmp));
 			}
 			dso.close();
 		} catch (SocketException e) {
@@ -457,9 +468,10 @@ public class MssgUPD {
 		}
 	}
 
-	protected static void analyseMssg(String str, boolean isPrivate) throws LengthException, MssgSpellCheck {
+	protected static void analyseMssg(String str, byte[] buffer, boolean isPrivate)
+			throws LengthException, MssgSpellCheck {
 		String parts[] = str.split(" ");
-		if (str.getBytes().length > Main.SIZEMESSG) {
+		if (buffer.length > Main.SIZEMESSG) {
 			throw new LengthException(str.length(), str, "UDP");
 		}
 		if (parts[0].equals("WHOS") || (parts[0].equals("EYBG") && isPrivate == true)) {

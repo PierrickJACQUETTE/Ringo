@@ -4,7 +4,7 @@ public class MssgApplDemande extends Mssg {
 
 	private int nmbDeMssg;
 	private int numeroMssgRecu;
-	private StringBuilder contenu;
+	private byte[] contenu;
 	private String mssgReq;
 	private String idTrans;
 
@@ -12,7 +12,7 @@ public class MssgApplDemande extends Mssg {
 		super(idm);
 		this.nmbDeMssg = -1;
 		this.numeroMssgRecu = -1;
-		this.contenu = new StringBuilder();
+		this.contenu = new byte[0];
 		this.mssgReq = mssgReq;
 		this.idTrans = null;
 	}
@@ -33,16 +33,24 @@ public class MssgApplDemande extends Mssg {
 		this.numeroMssgRecu = numeroMssgRecu;
 	}
 
-	public StringBuilder getContenu() {
+	public byte[] getContenu() {
 		return contenu;
 	}
 
-	public void setContenu(StringBuilder contenu) {
+	public void setContenu(byte[] contenu) {
 		this.contenu = contenu;
 	}
 
-	public void addContenu(String contenu) {
-		this.contenu.append(contenu);
+	public void addContenu(byte[] newContenu, int size) {
+		byte[] tmp = new byte[this.contenu.length + size];
+		int i = 0;
+		for (; i < this.contenu.length; i++) {
+			tmp[i] = this.contenu[i];
+		}
+		for (int j = 0; j < size; j++) {
+			tmp[i + j] = newContenu[j];
+		}
+		this.contenu = tmp;
 	}
 
 	public String getMssgReq() {
