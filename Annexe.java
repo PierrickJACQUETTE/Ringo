@@ -190,7 +190,7 @@ public class Annexe {
 				"\nWaiting for messages : WHOS, GBYE, TEST, INFO [SIMPLE|COMPLEX], APPL [DIFF mess| TRANS nom_fichier]\n");
 	}
 
-	protected static boolean verifAddress(String str, boolean isIPV4) {
+	protected static boolean verifAddress(String str, boolean isIPV4, boolean multi) {
 		try {
 			if (isIPV4) {
 				InetAddress i = (Inet4Address) InetAddress.getByName(str);
@@ -198,7 +198,11 @@ public class Annexe {
 					if (complAdrr(str) == false) {
 						return false;
 					}
-					return isGoodAddrMultiDiff(i);
+					if (multi) {
+						return isGoodAddrMultiDiff(i);
+					} else {
+						return true;
+					}
 				}
 			} else {
 				InetAddress.getByName(str);

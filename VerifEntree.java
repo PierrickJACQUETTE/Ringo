@@ -17,7 +17,7 @@ public class VerifEntree {
 		// while (!correct) {
 		// System.out.println("Veuillez entrer l'adresse multi-diff : ");
 		// reponse = sc.nextLine();
-		// correct = Annexe.verifAddress(reponse, true);
+		// correct = Annexe.verifAddress(reponse, true,true);
 		// }
 		// entite.setAddrMultiDiff(Annexe.convertIPV4Complete(reponse), anneau);
 
@@ -44,7 +44,7 @@ public class VerifEntree {
 		// System.out.println("Veuillez entrer l'adresse Ip de l'entité ou se
 		// connecter: ");
 		// reponse = sc.nextLine();
-		// correct = Annexe.verifAddress(reponse, false);
+		// correct = Annexe.verifAddress(reponse, false,false);
 		// }
 		// entite.setAddrNext(Annexe.convertIPV4Complete(reponse), 1);
 		// correct = false;
