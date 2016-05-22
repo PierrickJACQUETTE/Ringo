@@ -6,7 +6,6 @@
 #include "Annexe.h"
 #include "MssgTCP.h"
 
-void modeAffichage(int argc, char **argv);
 Entite* choixEntite(Entite* entite);
 Entite* rejoindreAnneau(Entite* entite, bool joindre);
 
