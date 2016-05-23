@@ -3,7 +3,8 @@
 
 #include "Core.h"
 
-Mssg * mssg_create(char* idm);
+Mssg* mssg_createT(char* idm, bool test, long t);
+Mssg* mssg_create(char* idm);
 void mssg_destroy(Mssg* mssg);
 
 #endif

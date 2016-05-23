@@ -1,6 +1,6 @@
 #include "Mssg.h"
 
-Mssg * mssg_create (char* idm){
+Mssg * mssg_createT(char* idm, bool test, long t){
 	Mssg *mssg =(Mssg*) malloc(sizeof(Mssg));
 	if (mssg == NULL){
 		fprintf(stderr,"Allocation impossible : %s\n","fonction mssg_create : Mssg.c");
@@ -8,6 +8,8 @@ Mssg * mssg_create (char* idm){
 	}
 	if(strlen(idm) == 8){
 		mssg->idm = idm;
+		mssg->isTest = test;
+		mssg->my_time = t;
 	}
 	else{
 		int len = strlen(idm);
@@ -19,4 +21,8 @@ Mssg * mssg_create (char* idm){
 void mssg_destroy(Mssg* mssg){
 	free(mssg->idm);
 	free(mssg);
+}
+
+Mssg * mssg_create(char* idm){
+	return mssg_createT(idm, false, 0);
 }
