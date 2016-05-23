@@ -172,7 +172,7 @@ Entite* insertAnneauTCP(Entite* entite, int sock) {
     }
     if (getIsDuplicateur(entite) == false) {
       // WELC
-      sprintf(send,"%s%s %s %s %s\n","WELC ",getAddrNext(entite,1), getPortOutUDP(entite,1), getAddrMultiDiff(entite,1), getPortMultiDiff(entite,1));
+      sprintf(send,"%s%s %s %s %s\n","WELC ",trouveAdress(), getPortOutUDP(entite,1), getAddrMultiDiff(entite,1), getPortMultiDiff(entite,1));
     } else {
       // NOTC
       sprintf(send, "%s\n", "NOTC");
@@ -240,7 +240,6 @@ Entite* insertAnneauTCP(Entite* entite, int sock) {
       entite = setIsDuplicateur(entite, demandeDupplication);
       print(false, entite);
       free(send);
-      free(futurPortUDPOut);
       free(futurAddrUDPOut);
     } else {
       close(sock2);
