@@ -8,7 +8,6 @@ List * list_create (Mssg* data){
   }
   list->data = data;
   list->next = NULL;
-
   return list;
 }
 
@@ -38,10 +37,28 @@ void list_print(List* list){
   List* tmp = list;
   int i = 0;
   while (tmp){
-    printf("%d : %s\n", i, tmp->data->idm);
+    if(tmp->data !=NULL){
+      printf("%d : %s\n", i, tmp->data->idm);
+      i++;
+    }
     tmp = tmp->next;
-    i++;
   }
+}
+
+void list_removeOne(List* list, Mssg* m){
+  List* current = list->next;
+  List* previous = list;
+  while (current != NULL && previous != NULL) {
+    if (strcmp(m->idm, current->data->idm) == 0) {
+      List * temp = current;
+      previous->next = current->next;
+      free(temp);
+      return;
+    }
+    previous = current;
+    current = current->next;
+  }
+  return;
 }
 
 List* list_remove_first(List *list){
