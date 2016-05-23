@@ -285,6 +285,21 @@ char* length8(char* tmp) {
   return res;
 }
 
+long timeReel(){
+  struct timeval end;
+  long seconds, useconds;
+  gettimeofday(&end, NULL);
+  seconds  = end.tv_sec ;
+  useconds = end.tv_usec;
+  return seconds + useconds;
+}
+
+char* newIdentifiant(){
+  char identifiant[20];
+  sprintf(identifiant, "%ld", timeReel());
+  return(length8(identifiant));
+}
+
 char* suppPoint(char* str){
   char* res = malloc(sizeof(str));
   if(res == NULL ){
@@ -313,6 +328,16 @@ char* identifiantEntite(char* port){
   idm = length8(suppPoint(idm));
   return idm;
 }
+
+char* remplirZero(int size, int sizeVoulu) {
+		char* taille = malloc(sizeof(char)*100);
+    sprintf(taille,"%d",size);
+		taille = addZero(taille, 16);
+    char strTmp [100];
+    strncat(strTmp, taille+strlen(taille)-sizeVoulu, strlen(taille));
+    strcat(taille,strTmp);
+		return taille;
+	}
 
 void waitAMssg() {
   printf("\nWaiting for messages : WHOS, GBYE, TEST, INFO [SIMPLE|COMPLEX], APPL DIFF mess\n");

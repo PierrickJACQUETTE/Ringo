@@ -15,4 +15,7 @@ char* convertIPV4Complete(char * textAddr);
 char* trouveAdress();
 char* identifiantEntite(char* port);
 void waitAMssg();
+long timeReel();
+char* newIdentifiant();
+char* remplirZero(int size, int sizeVoulu);
 #endif
