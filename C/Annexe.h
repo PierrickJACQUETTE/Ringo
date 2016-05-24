@@ -12,6 +12,7 @@ char** split(char* a_str, const char a_delim);
 char* copyStr(char *lpBuffer);
 int entier(char* str);
 char* convertIPV4Complete(char * textAddr);
+char* convertIPV4Imcomplete(char* str);
 char* trouveAdress();
 char* identifiantEntite(char* port);
 void waitAMssg();

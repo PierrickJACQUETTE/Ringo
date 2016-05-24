@@ -73,14 +73,20 @@ bool verifNombre(char * str,bool isUDP){
   return true;
 }
 
-bool verifAddress(char * str){
+bool verifAddress(char* str){
   struct in_addr address;
   int i = inet_aton(str,&address);
-  return (i == 0) ? false : true;
+  struct addrinfo *first_info;
+  struct addrinfo hints;
+  bzero(&hints,sizeof(struct addrinfo));
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+  int ii = getaddrinfo(str, "7778", &hints, &first_info);
+  return (i == 0 || ii==00 ) ? true : false;
 }
 
 char* addZero(char* str, int nbrZero) {
-  char* res = "";
+  char* res = malloc(sizeof(char)*nbrZero);
   int i;
   for (i = 0; i < nbrZero; i++) {
     strcat(res,"0");
@@ -147,6 +153,38 @@ char* copyStr(char *lpBuffer){
 
 int entier(char* str){
   return atoi(str);
+}
+
+char* convertIPV4Imcomplete(char* str){
+  char* copyTextAddr = copyStr(str);
+  char* copyTextAddr2 = copyStr(str);
+  int nombreDePartie = sizePart(copyTextAddr2, ".");
+  char** parts = split(copyTextAddr, '.');
+  char* addrComplete = malloc(15*sizeof(char));
+  if(addrComplete == NULL ){
+    fprintf(stderr,"Allocation Impossible: %s\n","fonction convertIPV4Complete : Annexe.c");
+    return NULL;
+  }
+  int j;
+  for(j=0;j<strlen(addrComplete);j++){
+    addrComplete[j]='0';
+  }
+  for (j = 0; j < nombreDePartie; j++) {
+    if(j == 0){
+      sprintf(addrComplete, "%d", entier(parts[j]));
+    }
+    else{
+      char buff[2];
+      sprintf(buff, "%d", entier(parts[j]));
+      strcat(addrComplete, buff);
+    }
+    if(j+1 < nombreDePartie){
+      char buff2[2];
+      sprintf(buff2, "%c", '.');
+      strcat(addrComplete, buff2);
+    }
+  }
+  return addrComplete;
 }
 
 char* convertIPV4Complete(char * textAddr) {
@@ -258,7 +296,7 @@ char* base(char* str){
 char* length8(char* tmp) {
   int coupure = 8;
   tmp = base(tmp);
-  char* res = malloc(8*sizeof(char));
+  char* res = malloc(coupure*sizeof(char));
   if(res == NULL ){
     fprintf(stderr,"Allocation Impossible: %s\n","fonction length8 : Annexe.c");
     return NULL;
@@ -269,6 +307,7 @@ char* length8(char* tmp) {
     for (c =sizeTmp-coupure; c < sizeTmp; c++) {
       res[c] = tmp[c];
     }
+    res[c]='\0';
   }
   else if(sizeTmp < coupure){
     int c;
@@ -278,6 +317,7 @@ char* length8(char* tmp) {
     for (c = sizeTmp; c < coupure; c++) {
       res[c] = '0';
     }
+    res[c]='\0';
   }
   else{
     res = tmp;
@@ -287,17 +327,18 @@ char* length8(char* tmp) {
 
 long timeReel(){
   struct timeval end;
-  long seconds, useconds;
+  long mm, seconds, useconds;
   gettimeofday(&end, NULL);
   seconds  = end.tv_sec ;
   useconds = end.tv_usec;
-  return seconds + useconds;
+  mm = seconds + useconds;
+  return mm;
 }
 
 char* newIdentifiant(){
-  char identifiant[20];
+  char* identifiant = malloc(sizeof(char)*10);
   sprintf(identifiant, "%ld", timeReel());
-  return(length8(identifiant));
+  return length8(identifiant);
 }
 
 char* suppPoint(char* str){
@@ -325,19 +366,15 @@ char* identifiantEntite(char* port){
     return NULL;
   }
   sprintf(idm, "%s%s", adresse, port);
-  idm = length8(suppPoint(idm));
-  return idm;
+  return length8(suppPoint(idm));
 }
 
-char* remplirZero(int size, int sizeVoulu) {
-		char* taille = malloc(sizeof(char)*100);
-    sprintf(taille,"%d",size);
-		taille = addZero(taille, 16);
-    char strTmp [100];
-    strncat(strTmp, taille+strlen(taille)-sizeVoulu, strlen(taille));
-    strcat(taille,strTmp);
-		return taille;
-	}
+char* remplirZero(int size, int sizeVoulu){
+  char* taille = malloc(sizeof(char)*(sizeVoulu));
+  sprintf(taille,"%d",size);
+  taille = addZero(taille, sizeVoulu-strlen(taille));
+  return taille;
+}
 
 void waitAMssg() {
   printf("\nWaiting for messages : WHOS, GBYE, TEST, INFO [SIMPLE|COMPLEX], APPL DIFF mess\n");
