@@ -13,7 +13,7 @@ Mssg * mssg_createT(char* idm, bool test, long t){
 	}
 	else{
 		int len = strlen(idm);
-		fprintf(stderr,"La taille de l'identifiant ne vaut pas 8 mais : %d\n",len);
+		fprintf(stderr,"La taille de l'identifiant ne vaut pas 8 mais : %d %s \n",len ,idm);
 	}
 	return mssg;
 }
@@ -21,6 +21,15 @@ Mssg * mssg_createT(char* idm, bool test, long t){
 void mssg_destroy(Mssg* mssg){
 	free(mssg->idm);
 	free(mssg);
+}
+
+bool getIsTest(Mssg* message){
+	return message->isTest;
+}
+
+Mssg* setIsTest(Mssg* message, bool test){
+	message->isTest = test;
+	return message;
 }
 
 Mssg * mssg_create(char* idm){
