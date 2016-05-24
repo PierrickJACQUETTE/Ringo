@@ -25,12 +25,31 @@ List* list_add(List* list, Mssg* data){
   }
 }
 
-bool list_search(List* list,Mssg* data){
+bool list_search(List* list, Mssg* data){
   List* tmp = list;
   while (tmp){
+    if(tmp->data !=NULL){
+      if(strcmp(tmp->data->idm, data->idm) == 0){
+        return true;
+      }
+    }
     tmp = tmp->next;
   }
   return false;
+}
+
+List* list_changeTest(List* list, Mssg* data){
+  List* tmp = list;
+  while (tmp){
+    if(tmp->data !=NULL){
+      if(strcmp(tmp->data->idm, data->idm) == 0){
+        tmp->data->isTest = false;
+        break;
+      }
+    }
+    tmp = tmp->next;
+  }
+  return list;
 }
 
 void list_print(List* list){
