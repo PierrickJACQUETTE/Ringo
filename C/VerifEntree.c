@@ -49,7 +49,7 @@ Entite* initMultiDiff(Entite* entite,int anneau){
   //   reponse = saisir_chaine();
   //   correct = verifAddress(reponse);
   // }
-  // entite = setAddrMultiDiff(entite, reponse, anneau);
+  // entite = setAddrMultiDiff(entite, convertIPV4Complete(reponse), anneau);
   // free(reponse);
 
   return entite;
@@ -111,7 +111,7 @@ Entite* rejoindreAnneau(Entite* entite, bool joindre) {
   //   reponse = saisir_chaine();
   //   correct = verifAddress(reponse);
   // }
-  // entite = setAddrNext(entite, reponse, 1);
+  // entite = setAddrNext(entite, convertIPV4Complete(reponse), 1);
   // correct = false;
   // while ( !correct) {
   //   printf("Veuillez entrer le port TCP de l'entité ou se connecter: \n");
@@ -160,7 +160,7 @@ Entite* choixEntite(Entite* entite){
       printf("Voulez un A ou Z ou E?\n");
       reponse = saisir_chaine();
       if (strcmp(reponse,"A")==0) {
-        entite = setAddrNext(entite, "192.168.1.41", 1);
+        entite = setAddrNext(entite, "192.168.001.041", 1);
         entite = setPortTCPOut(entite, "7000");
         entite = setPortTCPIn(entite, "6999");
         entite = setPortInUDP(entite, "7002");
@@ -170,7 +170,7 @@ Entite* choixEntite(Entite* entite){
           entite = setAddrMultiDiff(entite, "238.255.000.005", 1);
         }
       } else if (strcmp(reponse,"Z")==0) {
-        entite = setAddrNext(entite, "192.168.1.41", 1);
+        entite = setAddrNext(entite, "127.000.000.006", 1);
         entite = setPortTCPOut(entite, "7000");
         entite = setPortTCPIn(entite, "7008");
         entite = setPortInUDP(entite, "6001");
