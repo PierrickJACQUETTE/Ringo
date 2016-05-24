@@ -6,8 +6,7 @@
 #include "Entite.h"
 #include "Anneau.h"
 
-#define OPTVALMULTIDIFF SO_REUSEPORT
-// SO_REUSEADDR salle TP
+#define OPTVALMULTIDIFF SO_REUSEADDR //SO_REUSEPORT
 
 int main(int argc, char **argv);
 

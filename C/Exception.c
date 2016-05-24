@@ -1,7 +1,7 @@
 #include "Exception.h"
 
 void lengthException(int lengthAttendu, int lengthReel, char* ou, char* message) {
-  fprintf(stderr,"Erreur dans le nombre d'arguments en %s nombre d'arguments trouve : %d et %d sont attendus pour le message %s", ou, lengthReel, lengthAttendu, message);
+  fprintf(stderr,"Erreur dans le nombre d'arguments en %s nombre d'arguments trouve : %d et %d sont attendus pour le message %s\n", ou, lengthReel, lengthAttendu, message);
   INFO("Je ne transfere pas ce message");
 }
 
