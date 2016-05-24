@@ -75,8 +75,8 @@ Entite* insertNouveauTCP(Entite* entite, bool joindre) {
   struct addrinfo hints;
   bzero(&hints,sizeof(struct addrinfo));
   hints.ai_family = AF_INET;
-  hints.ai_socktype=SOCK_STREAM;
-  int r2 = getaddrinfo(getAddrNext(entite,1),getPortTCPOut(entite),&hints,&first_info);
+  hints.ai_socktype = SOCK_STREAM;
+  int r2 = getaddrinfo(convertIPV4Imcomplete(getAddrNext(entite,1)),getPortTCPOut(entite),&hints,&first_info);
   if(r2 == -1){
     fprintf(stderr,"pb InsertNOUVEAU TCP\n");
   }
@@ -136,11 +136,13 @@ Entite* insertNouveauTCP(Entite* entite, bool joindre) {
         }
 
         close(sock);
+        INFO("Fin de connection TCP");
         print(false, entite);
         free(copyMessage3);
       } else {
         printf("Entite ou se connecter est deja un doubleur ");
         close(sock);
+        INFO("Fin de connection TCP");
         print(true, entite);
         exit(EXIT_FAILURE);
       }
@@ -237,12 +239,14 @@ Entite* insertAnneauTCP(Entite* entite, int sock) {
       }
 
       close(sock2);
+      INFO("Fin de connection TCP");
       entite = setIsDuplicateur(entite, demandeDupplication);
       print(false, entite);
       free(send);
       free(futurAddrUDPOut);
     } else {
       close(sock2);
+      INFO("Fin de connection TCP");
       print(true, entite);
     }
     free(parts);
