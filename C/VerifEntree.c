@@ -83,7 +83,6 @@ Entite* initEntite(Entite* entite) {
   //   }
   // }
   // entite = setPortTCPIn(entite, reponse);
-  // free(reponse);
 
   entite = setIdentifiant(entite, identifiantEntite(getPortTCPIn(entite)));
   return entite;
@@ -119,7 +118,6 @@ Entite* rejoindreAnneau(Entite* entite, bool joindre) {
   //   correct = verifNombre(reponse, false);
   // }
   // entite = setPortTCPOut(entite, reponse);
-  // free(reponse);
 
   if (joindre == false) {
     entite = initMultiDiff(entite, 2);

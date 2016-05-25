@@ -76,6 +76,9 @@ Entite* insertNouveauTCP(Entite* entite, bool joindre) {
   bzero(&hints,sizeof(struct addrinfo));
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
+  printf("Ici\n");
+  printf("%s\n",getAddrNext(entite,1) );
+  printf("%s\n", convertIPV4Imcomplete(getAddrNext(entite,1)));
   int r2 = getaddrinfo(convertIPV4Imcomplete(getAddrNext(entite,1)),getPortTCPOut(entite),&hints,&first_info);
   if(r2 == -1){
     fprintf(stderr,"pb InsertNOUVEAU TCP\n");
