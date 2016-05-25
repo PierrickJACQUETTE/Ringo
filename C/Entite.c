@@ -100,7 +100,7 @@ char* getPortOutUDP(Entite* entite, int i) {
 	} else if (i == 2) {
 		res =  entite->portUDPOut[1];
 	} else {
-		fprintf(stderr,"Erreur dans getAddrMultiDiff anneau non reconnue\n");
+		fprintf(stderr,"Erreur dans getAddrMultiDiff anneau non reconnue : %d \n", i);
 	}
 	return res;
 }
@@ -111,7 +111,7 @@ Entite* setPortOutUDP(Entite* entite, char* portOutUDP, int i) {
 	} else if (i == 2) {
 		entite->portUDPOut[1] = portOutUDP;
 	} else {
-		fprintf(stderr,"Erreur dans setAddrNext anneau non reconnue\n");
+		fprintf(stderr,"Erreur dans setAddrNext anneau non reconnue : %d \n", i);
 	}
 	return entite;
 }
@@ -141,7 +141,7 @@ char * getAddrNext(Entite* entite, int i) {
 	} else if (i == 2) {
 		res =  entite->adresseOut[1];
 	} else {
-		fprintf(stderr,"Erreur dans getAddrNext anneau non reconnue\n");
+		fprintf(stderr,"Erreur dans getAddrNext anneau non reconnue : %d \n", i);
 	}
 	return res;
 }
@@ -152,7 +152,7 @@ Entite* setAddrNext(Entite* entite, char * addrNext, int i) {
 	} else if (i == 2){
 		entite->adresseOut[1] = addrNext;
 	} else {
-		fprintf(stderr,"Erreur dans setAddrNext anneau non reconnue\n");
+		fprintf(stderr,"Erreur dans setAddrNext anneau non reconnue : %d \n", i);
 	}
 	return entite;
 }
@@ -164,7 +164,7 @@ char * getAddrMultiDiff(Entite* entite, int i) {
 	} else if (i == 2) {
 		res =  entite->addrMultiDiff[1];
 	} else {
-		fprintf(stderr,"Erreur dans getAddrMultiDiff anneau non reconnue\n");
+		fprintf(stderr,"Erreur dans getAddrMultiDiff anneau non reconnue : %d \n", i);
 	}
 	return res;
 }
@@ -175,7 +175,7 @@ Entite* setAddrMultiDiff(Entite* entite, char * addrMultiDiff, int i) {
 	} else if (i == 2) {
 		entite->addrMultiDiff[1] = addrMultiDiff;
 	} else {
-		fprintf(stderr,"Erreur dans setAddrMultiDiff anneau non reconnue\n");
+		fprintf(stderr,"Erreur dans setAddrMultiDiff anneau non reconnue : %d \n", i);
 	}
 	return entite;
 }
@@ -187,7 +187,7 @@ char* getPortMultiDiff(Entite* entite, int i) {
 	} else if (i == 2) {
 		res = entite->portMultiDiff[1];
 	} else {
-		fprintf(stderr,"Erreur dans portMultiDiff anneau non reconnue\n");
+		fprintf(stderr,"Erreur dans portMultiDiff anneau non reconnue : %d \n", i);
 	}
 	return res;
 }
@@ -198,7 +198,7 @@ Entite* setPortMultiDiff(Entite* entite, char* portMultiDiff, int i) {
 	} else if (i == 2) {
 		entite->portMultiDiff[1] = portMultiDiff;
 	} else {
-		fprintf(stderr,"Erreur dans portMultiDiff anneau non reconnue\n");
+		fprintf(stderr,"Erreur dans portMultiDiff anneau non reconnue : %d \n", i);
 	}
 	return entite;
 }
