@@ -325,14 +325,18 @@ char* length8(char* tmp) {
   return res;
 }
 
+
 long timeReel(){
-  struct timeval end;
-  long mm, seconds, useconds;
-  gettimeofday(&end, NULL);
-  seconds  = end.tv_sec ;
-  useconds = end.tv_usec;
-  mm = seconds + useconds;
-  return mm;
+  struct timespec start_time;
+  clock_gettime(CLOCK_REALTIME, &start_time);
+  return start_time.tv_nsec;
+  // struct timeval end;
+  // long mm, seconds, useconds;
+  // gettimeofday(&end, NULL);
+  // seconds  = end.tv_sec ;
+  // useconds = end.tv_usec;
+  // mm = seconds + useconds;
+  //return mm;
 }
 
 char* newIdentifiant(){

@@ -20,10 +20,8 @@ Entite* entite_create(){
 	entite->portMultiDiff[1] = NULL;
 	entite->isDuplicateur = false;
 	entite->isEYBE = false;
-
 	entite->mssgTransmisAnneau1 = list_create(NULL);
 	entite->mssgTransmisAnneau2 = list_create(NULL);
-
 	return entite;
 }
 

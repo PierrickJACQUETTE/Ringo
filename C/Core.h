@@ -4,7 +4,7 @@
 #include "Include.h"
 
 #define SIZEMSSG 512
-#define TIMEMAX 20
+#define TIMEMAX 5
 
 typedef struct{
 	char* idm;
