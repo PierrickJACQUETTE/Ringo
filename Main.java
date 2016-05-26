@@ -14,7 +14,7 @@ public class Main {
 	public static void main(String[] args) {
 		affichage = false;
 		if (args.length >= 1) {
-			option = args[1];
+			option = args[0];
 			if (option.equals("--debeug")) {
 				affichage = true;
 			}

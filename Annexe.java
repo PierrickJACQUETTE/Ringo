@@ -7,7 +7,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Scanner;
 import java.io.File;
