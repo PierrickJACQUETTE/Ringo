@@ -7,6 +7,7 @@
 #include "MssgTCP.h"
 #include "MssgUDP.h"
 #include "ThreadScanner.h"
+#include "MssgMultiDiff.h"
 
 void anneau_insert(Entite* entite, int optvalMultiDiff);
 

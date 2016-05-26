@@ -48,7 +48,8 @@ void anneau_insert(Entite* entite, int optvalMultiDiff){
   bzero(&address_sock_udp,sizeof(address_sock_udp));
   address_sock_udp.sin_family = AF_INET;
   address_sock_udp.sin_port = htons(entier(getPortInUDP(entite)));
-  address_sock_tcp.sin_addr.s_addr = htonl(INADDR_ANY);
+  //inet_aton(convertIPV4Imcomplete(trouveAdress()), &address_sock_udp.sin_addr);
+  address_sock_udp.sin_addr.s_addr = htonl(INADDR_ANY);
   if(bind(sock_udp, (struct sockaddr *)&address_sock_udp, sizeof(struct sockaddr_in))==-1){
     closeSock("bind UDP NON BLOQUANT", sock_udp);
   }
@@ -57,10 +58,10 @@ void anneau_insert(Entite* entite, int optvalMultiDiff){
   }
   // ------------------------------------------------
 
-  // ------------ MULTI DIFF NON BLOQUANT -----------
+  // ------------ MULTI DIFF NON BLOQUANT ANNEAU 1-----------
   int sock_multi_diff = socket(PF_INET, SOCK_DGRAM,0);
-  if (sock_multi_diff ==-1) {
-    fprintf(stderr,"socket problem MULTI DIFF NON BLOQUANT\n");
+  if (sock_multi_diff == -1) {
+    fprintf(stderr, "socket problem MULTI DIFF NON BLOQUANT\n");
     exit(EXIT_FAILURE);
   }
   int ok = 1;
@@ -69,7 +70,7 @@ void anneau_insert(Entite* entite, int optvalMultiDiff){
     exit(EXIT_FAILURE);
   }
   struct sockaddr_in address_sock_multi_diff;
-  bzero(&address_sock_multi_diff,sizeof(address_sock_multi_diff));
+  bzero(&address_sock_multi_diff, sizeof(address_sock_multi_diff));
   address_sock_multi_diff.sin_family = AF_INET;
   address_sock_multi_diff.sin_port = htons(entier(getPortMultiDiff(entite,1)));
   address_sock_multi_diff.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -92,14 +93,59 @@ void anneau_insert(Entite* entite, int optvalMultiDiff){
   FD_SET(sock_udp, &initial);
   FD_SET(sock_tcp, &initial);
   FD_SET(sock_multi_diff, &initial);
-
   FD_SET(STDIN_FILENO,&initial);
 
+  bool first = true;
+  int sock_multi_diff2;
   while(1){
+    pthread_t multidiffSend;
+    if (pthread_create(&multidiffSend, NULL, run, (void*)entite) !=0) {
+      fprintf(stderr, "Impossible de creer le thread multidiff");
+      EXIT_FAILURE;
+    }
+    if (pthread_detach(multidiffSend)!=0){
+      fprintf(stderr, "Impossible de detached le thread multidiff");
+      EXIT_FAILURE;
+    }
     waitAMssg();
+
+    // ------------ MULTI DIFF NON BLOQUANT ANNEAU 2-----------
+    if(first == true && getIsDuplicateur(entite) == true){
+      sock_multi_diff2 = socket(PF_INET, SOCK_DGRAM,0);
+      if (sock_multi_diff2 == -1) {
+        fprintf(stderr,"socket problem MULTI DIFF2 NON BLOQUANT\n");
+        exit(EXIT_FAILURE);
+      }
+      int ok2 = 1;
+      if(setsockopt(sock_multi_diff2, SOL_SOCKET, optvalMultiDiff, &ok2, sizeof(ok2)) == -1){
+        fprintf(stderr, "setsockopt problem MULTI DIFF2 NON BLOQUANT\n");
+        exit(EXIT_FAILURE);
+      }
+      struct sockaddr_in address_sock_multi_diff2;
+      bzero(&address_sock_multi_diff2, sizeof(address_sock_multi_diff2));
+      address_sock_multi_diff2.sin_family = AF_INET;
+      address_sock_multi_diff2.sin_port = htons(entier(getPortMultiDiff(entite,2)));
+      address_sock_multi_diff2.sin_addr.s_addr = htonl(INADDR_ANY);
+      if(bind(sock_multi_diff2, (struct sockaddr *)&address_sock_multi_diff2, sizeof(struct sockaddr_in)) == -1){
+        closeSock(" bind MULTI DIFF2 NON BLOQUANT", sock_multi_diff2);
+      }
+      struct ip_mreq mreq2;
+      mreq2.imr_multiaddr.s_addr = inet_addr(getAddrMultiDiff(entite,2));
+      mreq2.imr_interface.s_addr = htonl(INADDR_ANY);
+      if(setsockopt(sock_multi_diff2, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq2, sizeof(mreq2))==-1){
+        closeSock("setsockopt MULTI DIFF2 NON BLOQUANT", sock_multi_diff2);
+      }
+      if (fcntl(sock_multi_diff2, F_SETFL,O_NONBLOCK) < 0) {
+        fprintf(stderr,"problem non bloquant MULTI DIFF\n");
+      }
+      first = false;
+      FD_SET(sock_multi_diff2, &initial);
+    }
+    // ------------------------------------------------
+
+
     fd_set rdfs;
     memcpy(&rdfs, &initial, sizeof(fd_set));
-    //  int fd_max = max(sock_tcp,sock_udp,sock_multi_diff);
     int ret=select(FD_SETSIZE, &rdfs, NULL, NULL, NULL);
     if(ret == -1){
       break;
@@ -114,7 +160,11 @@ void anneau_insert(Entite* entite, int optvalMultiDiff){
         ret--;
       }
       else if(FD_ISSET(sock_multi_diff,&rdfs)){
-        printf("Quelque chose en multidiff");
+        entite = receiveMultiDiff(entite, sock_multi_diff, 1);
+        ret--;
+      }
+      else if(FD_ISSET(sock_multi_diff2,&rdfs)){
+        entite = receiveMultiDiff(entite, sock_multi_diff2, 2);
         ret--;
       }
       else{
