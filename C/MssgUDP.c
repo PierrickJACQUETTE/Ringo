@@ -23,7 +23,7 @@ bool analyseMssgUDP(char* mssg, char** parts, int nombreDePartie, int size, bool
     res = true;
   }
   if(strcmp(parts[0], "WHOS")==0 || (strcmp(parts[0], "EYBG")==0 && isPrivate == true)){
-    res = suiteAnalyseMssgDiff(2, mssg, parts, nombreDePartie);
+    res = suiteAnalyseMssgInf(2, mssg, parts, nombreDePartie);
   }
   else if(strcmp(parts[0],"MEMB")==0 && isPrivate == true){
     res = suiteAnalyseMssgDiff(5, mssg, parts, nombreDePartie);
@@ -205,7 +205,7 @@ Entite* mssgGBYE(char* message, char** parts, Entite* entite){
       sendSUPP(entite, idm);
     }
   }
-  else if((strcmp(trouveAdress(), parts[2]) == 0) && (strcmp(getPortOutUDP(entite, anneau), parts[3]) == 0 ) ){
+  else if((strcmp(getAddrNext(entite, anneau), parts[2]) == 0) && (strcmp(getPortOutUDP(entite, anneau), parts[3]) == 0 ) ){
     entite = mssgGBYEsuite(entite, parts, anneau);
   }
   else{
@@ -217,7 +217,7 @@ Entite* mssgGBYE(char* message, char** parts, Entite* entite){
     anneau =2;
     if(list_search(getMssgTransmisAnneau2(entite), m) == true){
     }
-    else if( (strcmp(trouveAdress(), parts[2]) == 0) && (strcmp(getPortOutUDP(entite, anneau), parts[3]) == 0) ){
+    else if( (strcmp(getAddrNext(entite, anneau), parts[2]) == 0) && (strcmp(getPortOutUDP(entite, anneau), parts[3]) == 0) ){
       entite = mssgGBYEsuite(entite, parts, anneau);
     }
     else{
@@ -356,9 +356,9 @@ Entite* mssgAPPL(char* message, char** parts, Entite* entite){
 }
 
 Entite* receiveUDP(Entite* entite, int sock) {
-  char *tampon = malloc(sizeof(char)*SIZEMSSG);
-  int rec=recv(sock,tampon,SIZEMSSG,0);
-  tampon[rec]='\0';
+  char* tampon = malloc(sizeof(char)*SIZEMSSG);
+  int rec = recv(sock,tampon,SIZEMSSG,0);
+  tampon[rec] = '\0';
   INFO("Message UDP recu : ");
   INFO(tampon);
   INFO("");
