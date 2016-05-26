@@ -59,20 +59,20 @@ public class MssgUPD {
 	}
 
 	private static void sendSUPP(Entite entite, String idm) {
-		// String newIden = Annexe.newIdentifiant();
-		// String message = "SUPP " + newIden + " " + idm;
-		// sendUDP(message, entite, newIden, 1);
+		String newIden = Annexe.newIdentifiant();
+		String message = "SUPP " + newIden + " " + idm;
+		sendUDP(message.getBytes(), entite, newIden, 1);
 	}
 
 	private static void removeMssg(String idm, Entite entite, int anneau) {
-		// if (anneau == 1 && entite.getIsDuplicateur() == false) {
-		// Mssg.my_remove(entite.getMssgTransmisAnneau1(),idm);
-		// if (Main.affichage) {
-		// System.out.println(
-		// "Remove mssg with this idm : " + idm + " from this entity : " +
-		// entite.getIdentifiant());
-		// }
-		// }
+		if (anneau == 1 && entite.getIsDuplicateur() == false) {
+			Mssg m = new Mssg(idm);
+			m.my_remove(entite.getMssgTransmisAnneau1());
+			if (Main.affichage) {
+				System.out.println(
+						"Remove mssg with this idm : " + idm + " from this entity : " + entite.getIdentifiant());
+			}
+		}
 	}
 
 	private static void mssgWHO(String message, String[] parts, Entite entite) {
@@ -157,7 +157,7 @@ public class MssgUPD {
 				removeMssg(idm, entite, anneau);
 				sendSUPP(entite, idm);
 			}
-		} else if (Annexe.trouveAdress(true).equals(parts[2])
+		} else if (entite.getAddrNext(anneau).equals(parts[2])
 				&& entite.getPortOutUDP(anneau) == Integer.parseInt(parts[3])) {
 			mssgGBYE(entite, parts, anneau);
 		} else {
@@ -167,7 +167,7 @@ public class MssgUPD {
 		if (entite.getIsDuplicateur() == true) {
 			anneau = 2;
 			if (m.my_contains(entite.getMssgTransmisAnneau2())) {
-			} else if (Annexe.trouveAdress(true).equals(parts[2])
+			} else if (entite.getAddrNext(anneau).equals(parts[2])
 					&& entite.getPortOutUDP(anneau) == Integer.parseInt(parts[3])) {
 				mssgGBYE(entite, parts, anneau);
 			} else {
@@ -475,7 +475,7 @@ public class MssgUPD {
 			throw new LengthException(str.length(), str, "UDP");
 		}
 		if (parts[0].equals("WHOS") || (parts[0].equals("EYBG") && isPrivate == true)) {
-			suiteAnalyseMssgDiff(2, str, parts);
+			suiteAnalyseMssgInf(2, str, parts);
 		} else if (parts[0].equals("MEMB") && isPrivate == true) {
 			suiteAnalyseMssgDiff(5, str, parts);
 		} else if (parts[0].equals("GBYE")) {

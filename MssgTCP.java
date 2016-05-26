@@ -10,6 +10,7 @@ public class MssgTCP {
 
 	protected static Entite insertNouveauTCP(Entite entite, boolean joindre) {
 		try {
+			System.out.println(entite.getAddrNext(1) + " " + entite.getPortTCPOut());
 			Socket socket_tcp = new Socket(entite.getAddrNext(1), entite.getPortTCPOut());
 			BufferedReader br = new BufferedReader(new InputStreamReader(socket_tcp.getInputStream()));
 			PrintWriter tcp_pw = new PrintWriter(new OutputStreamWriter(socket_tcp.getOutputStream()));

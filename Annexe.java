@@ -116,11 +116,11 @@ public class Annexe {
 		for (String s : parts) {
 			int i = Integer.parseInt(s);
 			if ((i >= 0) && (i < 10)) {
-				addrComplete += addZero(s, 2);
+				addrComplete += addZero(i + "", 2);
 			} else if (i >= 10 && i < 99) {
-				addrComplete += addZero(s, 1);
+				addrComplete += addZero(i + "", 1);
 			} else {
-				addrComplete += addZero(s, 0);
+				addrComplete += addZero(i + "", 0);
 			}
 			addrComplete += ".";
 		}
@@ -334,28 +334,28 @@ public class Annexe {
 
 	protected static Entite initEntite(Entite entite, Scanner sc) {
 
-		// boolean correct = false;
-		// String reponse = "";
-		// while (!correct) {
-		// System.out.println("Veuillez entrer son numero du port UDP : ");
-		// reponse = sc.nextLine();
-		// correct = verifNombre(reponse, true);
-		// if (correct == true) {
-		// correct = testPortInUDP(entier(reponse));
-		// }
-		// }
-		// entite.setPortInUDP(entier(reponse));
-		// entite.setPortOutUDP(entier(reponse), 1);
-		// correct = false;
-		// while (!correct) {
-		// System.out.println("Veuillez entrer son numero du port TCP : ");
-		// reponse = sc.nextLine();
-		// correct = verifNombre(reponse, false);
-		// if (correct == true) {
-		// correct = testPortInTCP(entier(reponse));
-		// }
-		// }
-		// entite.setPortTCPIn(entier(reponse));
+		boolean correct = false;
+		String reponse = "";
+		while (!correct) {
+			System.out.println("Veuillez entrer son numero du port UDP : ");
+			reponse = sc.nextLine();
+			correct = verifNombre(reponse, true);
+			if (correct == true) {
+				correct = testPortInUDP(entier(reponse));
+			}
+		}
+		entite.setPortInUDP(entier(reponse));
+		entite.setPortOutUDP(entier(reponse), 1);
+		correct = false;
+		while (!correct) {
+			System.out.println("Veuillez entrer son numero du port TCP : ");
+			reponse = sc.nextLine();
+			correct = verifNombre(reponse, false);
+			if (correct == true) {
+				correct = testPortInTCP(entier(reponse));
+			}
+		}
+		entite.setPortTCPIn(entier(reponse));
 
 		entite.setIdentifiant(identifiantEntite(entite));
 		return entite;
