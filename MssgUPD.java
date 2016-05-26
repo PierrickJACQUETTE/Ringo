@@ -198,10 +198,9 @@ public class MssgUPD {
 		if (m.my_contains(entite.getMssgTransmisAnneau1())) {
 			ArrayList<Mssg> aLM = entite.getMssgTransmisAnneau1();
 			Mssg m1 = aLM.get(m.position(aLM));
+			String idmTmp = m1.getIdm();
 			m1.my_remove(aLM);
-			MssgTransmisTest mt = (MssgTransmisTest) m1;
-			mt.setTest(false);
-			aLM.add(mt);
+			aLM.add(new Mssg(idmTmp));
 			entite.setMssgTransmisAnneau1(aLM);
 			if (entite.getIsDuplicateur() == false) {
 				removeMssg(idm, entite, anneau);
@@ -221,10 +220,10 @@ public class MssgUPD {
 			if (m.my_contains(entite.getMssgTransmisAnneau2()) && one == false) {
 				ArrayList<Mssg> aLM = entite.getMssgTransmisAnneau2();
 				Mssg m1 = aLM.get(m.position(aLM));
+				String idmTmp = m1.getIdm();
 				m1.my_remove(aLM);
-				MssgTransmisTest mt = (MssgTransmisTest) m;
-				mt.setTest(false);
-				aLM.add(mt);
+				aLM.add(new Mssg(idmTmp));
+				entite.setMssgTransmisAnneau2(aLM);
 				System.out.println("\nL anneau est en parfait etat\n");
 			} else if (!parts[2].equals(entite.getAddrMultiDiff(anneau))
 					&& !parts[3].equals(entite.getPortMultiDiff(anneau))) {
