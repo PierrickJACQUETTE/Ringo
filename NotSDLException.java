@@ -1,4 +1,3 @@
-
 public class NotSDLException extends Exception {
 
 	public NotSDLException(String message, String ou) {

@@ -54,7 +54,7 @@ public class VerifEntree {
 		entite.setPortTCPOut(Annexe.entier(reponse));
 
 		if (joindre == false) {
-			entite = initMultidiff(entite, sc, 2);
+			entite = initMultidiff(entite, sc, 1);
 		}
 
 		printNewEntite(entite);
