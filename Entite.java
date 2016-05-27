@@ -249,7 +249,9 @@ public class Entite implements Runnable {
 					this.printEntiteComplex();
 					info = true;
 				} else if (tmp.equals("WHOS")) {
+					envoi(tmp, tmp2, suite, false);
 					envoi("MEMB", "", suite, true);
+					info = true;
 				} else if (tmp.contains("APPL")) {
 					suite = tmp.split(" ");
 					MssgUPD.suiteAnalyseMssgInf(3, tmp, suite);
