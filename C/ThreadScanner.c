@@ -40,7 +40,8 @@ Mssg* sendAnneauT(Entite* entite, char* tmp, char* tmpAPPL, int i, char** suite,
       strcat(res, suite[i]);
       debutReel+= strlen(suite[i])+1;
     }
-    strcat(message, remplirZero(debutReel-1,3));
+    char *aze = remplirZero(debutReel-1,3);
+    strcat(message, aze);
     strcat(message, res);
   }
   char* copyMessage2 = copyStr(message);
@@ -92,7 +93,9 @@ void threadScanner(Entite* entite) {
     entite_print_complex(entite);
     info = true;
   } else if (strcmp(reponse, "WHOS")==0) {
+ 	envoi(entite, reponse, copyReponse, suite, res, nombreDePartie);
     envoi(entite, "MEMB", "", suite, true, nombreDePartie);
+	info = true;
   } else if (strcmp(suite[0], "APPL")==0) {
     res = suiteAnalyseMssgInf(3, reponse, suite, nombreDePartie);
     reponse = suite[0];
