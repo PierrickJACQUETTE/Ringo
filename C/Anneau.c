@@ -96,7 +96,7 @@ void anneau_insert(Entite* entite, int optvalMultiDiff){
   FD_SET(STDIN_FILENO,&initial);
 
   bool first = true;
-  int sock_multi_diff2;
+  int sock_multi_diff2 = -1;
   while(1){
     pthread_t multidiffSend;
     if (pthread_create(&multidiffSend, NULL, run, (void*)entite) !=0) {
@@ -142,7 +142,6 @@ void anneau_insert(Entite* entite, int optvalMultiDiff){
       FD_SET(sock_multi_diff2, &initial);
     }
     // ------------------------------------------------
-
 
     fd_set rdfs;
     memcpy(&rdfs, &initial, sizeof(fd_set));
