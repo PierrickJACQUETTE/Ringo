@@ -285,16 +285,16 @@ public class MssgUPD {
 	}
 
 	private static byte[] corpsDuMssgAPPL(byte[] buffer, int debut) {
-		String[] parts = new String(buffer).split(" ");
-		int debutReel = 0;
-		for (int i = 0; i < debut; i++) {
-			debutReel += parts[i].length() + 1;
-		}
-		byte[] res = new byte[buffer.length - debutReel];
-		for (int j = 0; j < res.length; j++) {
-			res[j] = buffer[j + debutReel];
-		}
-		return res;
+		 String[] parts = new String(buffer).split(" ");
+		 int debutReel = 0;
+		 for (int i = 0; i < debut; i++) {
+		 	debutReel += parts[i].length() + 1;
+		 }
+		 byte[] res = new byte[buffer.length - debutReel];
+		 for (int j = 0; j < res.length; j++) {
+		 	res[j] = buffer[j + debutReel];
+		 }
+		 return res;
 	}
 
 	private static boolean mssgAPPLTRANS(byte[] buffer, Entite entite) {
@@ -310,6 +310,8 @@ public class MssgUPD {
 				String nbMssg = Annexe.toLittleEndian(Annexe.nbrMssgApplTrans(parts[5]) + ""); // Little
 																								// endian
 
+
+				//String nbMssg = ""+Annexe.nbrMssgApplTrans(parts[5]);
 				String idm = Annexe.newIdentifiant();
 				String message = "APPL " + idm + " TRANS### ROK ";
 				String idmM = Annexe.newIdentifiant();
@@ -326,12 +328,9 @@ public class MssgUPD {
 			if (m.my_contains(entite.getDemandeFichier())) {
 				int pos = m.position(entite.getDemandeFichier());
 				entite.getDemandeFichier().get(pos).setIdTrans(parts[4]);
-
-				// entite.getDemandeFichier().get(pos).setNmbDeMssg(Integer.parseInt(parts[7]));
 				String string = new String(Annexe.littleEndianTo(parts[7])); // Litttle
 				// endian
-
-				entite.getDemandeFichier().get(pos).setNmbDeMssg(Integer.parseInt(string));
+				entite.getDemandeFichier().get(pos).setNmbDeMssg(Integer.parseInt(string.trim()));
 				retransmet = false;
 			}
 			break;
@@ -343,12 +342,13 @@ public class MssgUPD {
 				m = entite.getDemandeFichier().get(pos);
 				String string = new String(Annexe.littleEndianTo(parts[5])); // little
 				// endian;
+				string = string.trim();
 				if (m.getNumeroMssgRecu() + 1 == Integer.parseInt(string)) {
-
-					// m.setNumeroMssgRecu(Integer.parseInt(parts[5));
-
 					m.setNumeroMssgRecu(Integer.parseInt(string));
-					m.addContenu(corpsDuMssgAPPL(buffer, 7), Integer.parseInt(parts[6]));
+					String tmp = new String(buffer);
+					tmp = tmp.substring(49);
+					System.out.println(tmp + " "+ Integer.parseInt(parts[6]));
+					m.addContenu(tmp.getBytes(), Integer.parseInt(parts[6].trim()));
 					if (m.getNmbDeMssg() - 1 == m.getNumeroMssgRecu()) {
 						File fileOut = new File(m.getIdm());
 						FileOutputStream fos;

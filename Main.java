@@ -9,7 +9,7 @@ public class Main {
 	protected static boolean affichage;
 	protected static final long TIMEMAX = 20000;
 	protected static final int SIZEMESSG = 512;
-	protected static final String TYPECONN = "eth0"; // bond0 ou wlan0
+	protected static final String TYPECONN = "eth0"; // bond0 ou wlan0 ou eth0
 
 	public static void main(String[] args) {
 		affichage = false;
