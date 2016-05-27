@@ -6,7 +6,7 @@
 char* saisir_chaine();
 char** substringLast(char** parts, int sizeParts);
 bool verifNombre(char * str, bool isUDP);
-bool verifAddress(char * str);
+bool verifAddress(char* str, bool multi);
 int sizePart(char* str, char * separateur);
 char** split(char* a_str, const char a_delim);
 char* copyStr(char *lpBuffer);

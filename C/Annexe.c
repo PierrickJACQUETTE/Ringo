@@ -48,7 +48,7 @@ bool inf65636(int i) {
 
 bool verifNombre(char * str,bool isUDP){
   int res = entier(str);
-  if(res == 0){
+  if( (res == 0) || (strlen(str) > 4) ){
     return false;
   }
   if (sup0(res) == false) {
@@ -73,7 +73,7 @@ bool verifNombre(char * str,bool isUDP){
   return true;
 }
 
-bool verifAddress(char* str){
+bool verifAddress(char* str, bool multi){
   struct in_addr address;
   int i = inet_aton(str,&address);
   struct addrinfo *first_info;
@@ -82,7 +82,13 @@ bool verifAddress(char* str){
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
   int ii = getaddrinfo(str, "7778", &hints, &first_info);
-  return (i == 0 || ii==00 ) ? true : false;
+  bool res = true;
+  if(multi == true){
+      char* copyMessage3 = copyStr(str);
+      char** parts = split(copyMessage3, '.');
+      res = (entier(parts[0]) > 239 || entier(parts[0]) < 224)? false : true;
+  }
+  return ((i == 0 || ii == 00) && res == true);
 }
 
 char* addZero(char* str, int nbrZero) {
@@ -325,18 +331,10 @@ char* length8(char* tmp) {
   return res;
 }
 
-
 long timeReel(){
   struct timespec start_time;
   clock_gettime(CLOCK_REALTIME, &start_time);
   return start_time.tv_nsec;
-  // struct timeval end;
-  // long mm, seconds, useconds;
-  // gettimeofday(&end, NULL);
-  // seconds  = end.tv_sec ;
-  // useconds = end.tv_usec;
-  // mm = seconds + useconds;
-  //return mm;
 }
 
 char* newIdentifiant(){
