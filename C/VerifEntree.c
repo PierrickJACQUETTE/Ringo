@@ -47,7 +47,7 @@ Entite* initMultiDiff(Entite* entite,int anneau){
   while ( !correct) {
     printf("Veuillez entrer l'adresse multi-diff : \n");
     reponse = saisir_chaine();
-    correct = verifAddress(reponse);
+    correct = verifAddress(reponse, true);
   }
   entite = setAddrMultiDiff(entite, convertIPV4Complete(reponse), anneau);
   free(reponse);
@@ -63,7 +63,7 @@ Entite* initEntite(Entite* entite) {
     fprintf(stderr,"Allocation impossible : %s\n","fonction initEntite : VerifEntree.c");
     return NULL;
   }
-  while ( !correct) {
+  while ( correct==false) {
     printf("Veuillez entrer son numero du port UDP : \n");
     reponse = saisir_chaine();
     correct = verifNombre(reponse, true);
@@ -74,7 +74,7 @@ Entite* initEntite(Entite* entite) {
   entite = setPortInUDP(entite, reponse);
   entite = setPortOutUDP(entite, reponse, 1);
   correct = false;
-  while ( !correct) {
+  while ( correct==false) {
     printf("Veuillez entrer son numero du port TCP : \n");
     reponse = saisir_chaine();
     correct = verifNombre(reponse, false);
@@ -108,7 +108,7 @@ Entite* rejoindreAnneau(Entite* entite, bool joindre) {
   while ( !correct) {
     printf("Veuillez entrer l'adresse Ip de l'entité ou se connecter: \n");
     reponse = saisir_chaine();
-    correct = verifAddress(reponse);
+    correct = verifAddress(reponse, false);
   }
   entite = setAddrNext(entite, convertIPV4Complete(reponse), 1);
   correct = false;
@@ -120,7 +120,7 @@ Entite* rejoindreAnneau(Entite* entite, bool joindre) {
   entite = setPortTCPOut(entite, reponse);
 
   if (joindre == false) {
-    entite = initMultiDiff(entite, 2);
+    entite = initMultiDiff(entite, 1);
   }
   entite_print_new(entite);
   return entite;
